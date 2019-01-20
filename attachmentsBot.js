@@ -24,7 +24,7 @@ class AttachmentsBot {
                 await this.handleIncomingAttachment(turnContext);
             } else {
                 // Since no attachment was received, send an attachment to the user.
-                await this.handleOutgoingAttachment(turnContext);
+                "you didn't upload any attachment, please upload image"
             }
 
             // Send a HeroCard with potential options for the user to select.
@@ -32,15 +32,11 @@ class AttachmentsBot {
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate &&
             turnContext.activity.recipient.id === turnContext.activity.membersAdded[0].id && turnContext.activity.recipient.name === turnContext.activity.membersAdded[0].name) {
             // If the Activity is a ConversationUpdate, send a greeting message to the user.
-            await turnContext.sendActivity('Welcome to the Attachment Handling sample! Send me an attachment and I will save it.');
-            await turnContext.sendActivity('Alternatively, I can send you an attachment.');
-
-            // Send a HeroCard with potential options for the user to select.
-            await this.displayOptions(turnContext);
-        } else if (turnContext.activity.type !== ActivityTypes.ConversationUpdate) {
+            await turnContext.sendActivity('Welcome to the identification module! please upload image of the crop');
+        } /*else if (turnContext.activity.type !== ActivityTypes.ConversationUpdate) {
             // Respond to all other Activity types.
             await turnContext.sendActivity(`[${ turnContext.activity.type }]-type activity detected.`);
-        }
+        }*/
     }
 
     /**
@@ -59,8 +55,8 @@ class AttachmentsBot {
             if (localAttachmentData) {
                 // Because the TurnContext was bound to this function, the bot can call
                 // `TurnContext.sendActivity` via `this.sendActivity`;
-                await this.sendActivity(`Attachment "${ localAttachmentData.fileName }" ` +
-                    `has been received and saved to "${ localAttachmentData.localPath }".`);
+                await this.sendActivity(`Attachment "${localAttachmentData.fileName}" ` +
+                    `has been received and saved to "${localAttachmentData.localPath}".`);
             } else {
                 await this.sendActivity('Attachment was not successfully saved to disk.');
             }
@@ -166,7 +162,7 @@ class AttachmentsBot {
         return {
             name: 'architecture-resize.png',
             contentType: 'image/png',
-            contentUrl: `data:image/png;base64,${ base64Image }`
+            contentUrl: `data:image/png;base64,${base64Image}`
         };
     }
 
@@ -198,7 +194,7 @@ class AttachmentsBot {
 
         // Retrieve baseUri from ConnectorClient for... something.
         const baseUri = connector.baseUri;
-        const attachmentUri = baseUri + (baseUri.endsWith('/') ? '' : '/') + `v3/attachments/${ encodeURI(response.id) }/views/original`;
+        const attachmentUri = baseUri + (baseUri.endsWith('/') ? '' : '/') + `v3/attachments/${encodeURI(response.id)}/views/original`;
         return {
             name: 'architecture-resize.png',
             contentType: 'image/png',
