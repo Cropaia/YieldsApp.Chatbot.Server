@@ -30,8 +30,8 @@ class AttachmentsBot {
             // Send a HeroCard with potential options for the user to select.
             await this.displayOptions(turnContext);
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate) {
-            console.log("recipient id", turnContext.activity.recipient.id );
-            console.log("membersAdded id", turnContext.activity.membersAdded[0].id);
+            console.log("recipient id",  turnContext.activity );
+            console.log("membersAdded id", turnContext.activity.membersAdded);
             // If the Activity is a ConversationUpdate, send a greeting message to the user.
             await turnContext.sendActivity('Welcome to the Attachment Handling sample! Send me an attachment and I will save it.');
             await turnContext.sendActivity('Alternatively, I can send you an attachment.');
