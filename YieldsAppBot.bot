@@ -1,0 +1,52 @@
+{
+  "name": "YieldsAppBot",
+  "padlock": "Ri93qkEEwJZMgCe0/hGChg==!2976G5k/+AyrCzWfbbYuOfcLp32WlKSZ1ygj70xWUPZj3qhwRWUJZJGqdWzhDsiX",
+  "version": "2.0",
+  "services": [
+    {
+      "tenantId": "15e05742-fcc5-468c-a9f5-9fb28fa5db54",
+      "subscriptionId": "ad6dcc70-f72d-40ce-ac3b-529ed4634114",
+      "resourceGroup": "yieldsappbot",
+      "serviceName": "YieldsAppBot",
+      "type": "abs",
+      "name": "YieldsAppBot",
+      "id": "1"
+    },
+    {
+      "connectionString": "VjQAPtof7WQSTybgji4xHQ==!R4vUz8HODvSOE/0omUqH54V3DySWaMroczS9tZurEu68889r0CjkWEFBhAOLfk1aSA0VivTNnsWIvU1zSDrOsYWRVKgDxeT57qKx280Im3CG2oJOLk8Mj2HRSzXNKHkpLE+DHSn78zRS8+vzJ2//zEP4cdT62DXJn57zO3uy8cSqaB+9Ucnbp+3SxOhAESwbJGTg3ZhbGp81wK63NUHr4m+M+C3Asl8wzAuuIY88jR4=",
+      "tenantId": "15e05742-fcc5-468c-a9f5-9fb28fa5db54",
+      "subscriptionId": "ad6dcc70-f72d-40ce-ac3b-529ed4634114",
+      "resourceGroup": "yieldsappbot",
+      "serviceName": "yieldsappbotbc89",
+      "type": "blob",
+      "id": "2"
+    },
+    {
+      "appId": "",
+      "appPassword": "",
+      "endpoint": "http://localhost:3978/api/messages",
+      "type": "endpoint",
+      "name": "development",
+      "id": "3"
+    },
+    {
+      "appId": "72a1eba6-68ca-4cb2-a829-13b3cdb63941",
+      "appPassword": "dGGNE2kWmMtjEOijoEcnnw==!EWCnhVw9XmhgAj9C/O36V47LKHQC8F897iPi7+BOBdM=",
+      "endpoint": "https://yieldsappbot.azurewebsites.net/api/messages",
+      "type": "endpoint",
+      "name": "production",
+      "id": "4"
+    },
+    {
+      "instrumentationKey": "dmYa1MjnYWjoGiF9iD/zOg==!OD4/41zRA56x8mRB4/fqQg4CwtmjHfbxBikiy49wrMnwjFu6hyFwVOqmfONlr03r",
+      "applicationId": "32ff8b35-0b66-4bd5-ac00-baa4b5d9fefb",
+      "apiKeys": {},
+      "tenantId": "15e05742-fcc5-468c-a9f5-9fb28fa5db54",
+      "subscriptionId": "ad6dcc70-f72d-40ce-ac3b-529ed4634114",
+      "resourceGroup": "yieldsappbot",
+      "serviceName": "YieldsAppBotscesxd",
+      "type": "appInsights",
+      "id": "5"
+    }
+  ]
+}
