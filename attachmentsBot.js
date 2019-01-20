@@ -24,7 +24,7 @@ class AttachmentsBot {
                 await this.handleIncomingAttachment(turnContext);
             } else {
                 // Since no attachment was received, send an attachment to the user.
-                "you didn't upload any attachment, please upload image"
+                await turnContext.sendActivity('you didn\'t upload any attachment, please upload crop image');              
             }
 
             // Send a HeroCard with potential options for the user to select.
