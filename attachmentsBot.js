@@ -28,7 +28,7 @@ class AttachmentsBot {
             }
 
             // Send a HeroCard with potential options for the user to select.
-            await this.displayOptions(turnContext);
+           // await this.displayOptions(turnContext);
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate &&
             turnContext.activity.recipient.id === turnContext.activity.membersAdded[0].id && turnContext.activity.recipient.name === turnContext.activity.membersAdded[0].name) {
             // If the Activity is a ConversationUpdate, send a greeting message to the user.
