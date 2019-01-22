@@ -1,48 +1,54 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
-
-// bot.js is your bot's main entry point to handle incoming activities.
-
 const { ActivityTypes } = require('botbuilder');
+const { DialogSet, DialogTurnStatus } = require('botbuilder-dialogs');
 
-// Turn counter property
-const TURN_COUNTER_PROPERTY = 'turnCounterProperty';
+const DIALOG_STATE_PROPERTY = 'dialogState';
+const USER_CROP_DATA_PROPERTY = 'userCropDataProperty';
 
-class EchoBot {
-    /**
-     *
-     * @param {ConversationState} conversation state object
-     */
-    constructor(conversationState) {
-        // Creates a new state accessor property.
-        // See https://aka.ms/about-bot-state-accessors to learn more about the bot state and state accessors
-        this.countProperty = conversationState.createProperty(TURN_COUNTER_PROPERTY);
+const CROPDATA_DIALOG = 'cropdataDialog';
+
+const { UserDataCrop } = require('./dialogs/cropData/userDataCrop');
+const { CropDataDialog } = require('./dialogs/cropData/cropData');
+
+class Bot {
+
+    constructor(conversationState, userState) {
         this.conversationState = conversationState;
+
+        this.userCropDataAccessor = userState.createProperty(USER_CROP_DATA_PROPERTY);
+        this.dialogState = conversationState.createProperty(DIALOG_STATE_PROPERTY);
+
+        this.dialogs = new DialogSet(this.dialogState);
+        this.dialogs.add(new CropDataDialog(CROPDATA_DIALOG, this.userCropDataAccessor));
     }
-    /**
-     *
-     * Use onTurn to handle an incoming activity, received from a user, process it, and reply as needed
-     *
-     * @param {TurnContext} on turn context object.
-     */
+
     async onTurn(turnContext) {
-        // Handle message activity type. User's responses via text or speech or card interactions flow back to the bot as Message activity.
-        // Message activities may contain text, speech, interactive cards, and binary or unknown attachments.
-        // see https://aka.ms/about-bot-activity-message to learn more about the message and other activity types
         if (turnContext.activity.type === ActivityTypes.Message) {
-            // read from state.
-            let count = await this.countProperty.get(turnContext);
-            count = count === undefined ? 1 : ++count;
-            await turnContext.sendActivity(`${ count }: You said "${ turnContext.activity.text }1"`);
-            // increment and set turn counter.
-            await this.countProperty.set(turnContext, count);
+            let dialogResult;
+            const dc = await this.dialogs.createContext(context);
+            if (dc.activeDialog)
+                dialogResult = await dc.continueDialog();
+            if (!dc.context.responded) {
+                switch (dialogResult.status) {
+                    case DialogTurnStatus.empty:
+                        await dc.beginDialog(CROPDATA_DIALOG);
+                        break;
+                    case DialogTurnStatus.waiting:
+                        break;
+                    case DialogTurnStatus.complete:
+                        break;
+                    default:
+                        await dc.cancelAllDialogs();
+                        break;
+                }
+            }
+
         } else {
             // Generic handler for all other activity types.
-            await turnContext.sendActivity(`[${ turnContext.activity.type } event detected]`);
+            await turnContext.sendActivity(`[${turnContext.activity.type} event detected]`);
         }
-        // Save state changes
-        await this.conversationState.saveChanges(turnContext);
-    }
+
+        await this.conversationState.saveChanges(context);
+        await this.userState.saveChanges(context);    }
 }
 
-exports.EchoBot = EchoBot;
+exports.Bot = Bot;
