@@ -19,9 +19,9 @@ class CropData extends ComponentDialog {
 
         this.addDialog(new WaterfallDialog(CROP_DIALOG, [
             this.initializeStateStep.bind(this),
-            this.promptForAttachmentStep.bind(this)//,
-            //this.promptForCityStep.bind(this),
-            //this.displayCropDataStep.bind(this)
+            this.promptForAttachmentStep.bind(this),
+            this.promptForCropStep.bind(this),
+            this.handleOutgoingAttachment.bind(this)
         ]));
 
         this.UserDataCropAccessor = UserDataCropAccessor;
@@ -39,16 +39,55 @@ class CropData extends ComponentDialog {
         //const userDataCrop = await this.UserDataCropAccessor.get(step.context);
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
             // The user sent an attachment and the bot should handle the incoming attachment.
-            await this.handleIncomingAttachment(step.context);
+            await this._handleIncomingAttachment(step.context);
             return await step.next();
         } else {
             // Since no attachment was received, send an attachment to the user.
             await step.context.sendActivity('you didn\'t upload any attachment, please upload crop image');              
         }
     }
+    async promptForCropStep(step) {
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context);
+    
+        if (userDataCrop.crop==undefined) {
+
+            return await displayCropOptions(step.context);
+        } else {
+            return await step.next();        
+        }
+    }
+    async handleOutgoingAttachment(turnContext) {
+        const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
+        const reply = { type: ActivityTypes.Message };
+        const cropList = [ { id: 1, name: 'tomato'}, {id:2 , name: 'banana'}]
+        const text= turnContext.activity.text;
+        let idCrop=cropList.find(x=>x.id==userDataCrop.crop.id);
+        if(idCrop!=undefined)
+       step.endDialog();
+        else
+        await dc.beginDialog(promptForCropStep);
+        //return await step.();  
+        
+    }
+
+    async displayCropOptions(turnContext) {
+        const cropList = [ { id: 1, name: 'tomato'}, {id:2 , name: 'banana'}]
+        const reply = { type: ActivityTypes.Message };
+
+        let buttons= cropList.map((crop)=>{
+            return  { type: ActionTypes.ImBack, title: `${crop.id}.${crop.name}`, value: crop.id };
+        });
+
+        const card = CardFactory.heroCard('', undefined,
+            buttons, { text: 'You select one of the following choices.' });
+
+        reply.attachments = [card];
+
+        await turnContext.sendActivity(reply);
+    }
 
 
-    async handleIncomingAttachment(turnContext) {
+    async _handleIncomingAttachment(turnContext) {
         const promises = turnContext.activity.attachments.map(this.downloadAttachmentAndWrite);
         const successfulSaves = await Promise.all(promises);
 
