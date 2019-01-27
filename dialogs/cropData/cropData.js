@@ -51,7 +51,9 @@ class CropData extends ComponentDialog {
     
         if (userDataCrop.crop==undefined) {
 
-            return await displayCropOptions(step.context);
+            let option= await displayCropOptions(step.context);
+            if(option)
+            return  await step.next();  
         } else {
             return await step.next();        
         }
@@ -59,9 +61,12 @@ class CropData extends ComponentDialog {
     async handleOutgoingAttachment(turnContext) {
         const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
         const reply = { type: ActivityTypes.Message };
+
         const cropList = [ { id: 1, name: 'tomato'}, {id:2 , name: 'banana'}]
         const text= turnContext.activity.text;
         let idCrop=cropList.find(x=>x.id==userDataCrop.crop.id);
+        if(idCrop==undefined)
+        return  await displayCropOptions(turnContext); 
         if(idCrop!=undefined)
        step.endDialog();
         else
