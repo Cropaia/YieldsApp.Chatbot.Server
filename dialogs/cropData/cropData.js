@@ -40,7 +40,7 @@ class CropData extends ComponentDialog {
     }
 
     async promptForAttachmentStep(step) {
-        console.log("step", step);
+        //console.log("step", step);
         //const userDataCrop = await this.UserDataCropAccessor.get(step.context);
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
             // The user sent an attachment and the bot should handle the incoming attachment.
@@ -49,8 +49,7 @@ class CropData extends ComponentDialog {
             // Since no attachment was received, send an attachment to the user.
             return await step.prompt(ATTACHMENT_PROMPT, {
                 prompt: 'Please upload crop image',
-                retryPrompt: 'You didn\'t upload any attachment, please upload crop image.',
-                choices: options
+                retryPrompt: 'You didn\'t upload any attachment, please upload crop image.'
             });
         }
     }
