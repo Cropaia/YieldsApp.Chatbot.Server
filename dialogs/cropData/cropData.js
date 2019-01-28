@@ -100,7 +100,7 @@ class CropData extends ComponentDialog {
         console.log('promptForDateStep', step.result);
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
 
-        const text = step.context.activity.text;
+        const text = step.result.value;
         let crop = cropList.find(x => x.name == text);
         userDataCrop.crop = crop;
         console.log('userDataCrop', userDataCrop);
@@ -114,7 +114,8 @@ class CropData extends ComponentDialog {
 
     async endCropDialog(step) {
         console.log("endCropDialog", step.result);
-        userDataCrop.date = step.context.activity.text;
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context)
+        userDataCrop.date = step.result.value;
 
         await step.context.sendActivity('Thank you for you time.');
 
