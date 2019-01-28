@@ -79,9 +79,9 @@ class CropData extends ComponentDialog {
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
             let list = cropList.map((crop) => {
-                var object = {};
-                object[crop.name] = crop;
-                return object;
+               // var object = {};
+                //object[crop.name] = crop;
+                return crop.name;
             });
             console.log('list', list);
 
@@ -98,7 +98,7 @@ class CropData extends ComponentDialog {
         const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
 
         const text = turnContext.activity.text;
-        let crop = cropList.find(x => x.id == text);
+        let crop = cropList.find(x => x.name == text);
         console.log("idCrop", crop);
         /* if (idCrop == undefined)
              return await displayCropOptions(turnContext);
