@@ -40,9 +40,13 @@ class CropData extends ComponentDialog {
     }
 
     async promptForAttachmentStep(step) {
+        console.log('promptForAttachmentStep');
+
         //console.log("step", step);
         //const userDataCrop = await this.UserDataCropAccessor.get(step.context);
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
+            console.log('there is attachment');
+
             // The user sent an attachment and the bot should handle the incoming attachment.
             return await step.next();
         } else {
@@ -54,21 +58,30 @@ class CropData extends ComponentDialog {
         }
     }
     async promptForCropStep(step) {
+        console.log('promptForCropStep');
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
+            console.log('_handleIncomingAttachment');
+
             await this._handleIncomingAttachment(step.context);
         }
-        const userDataCrop = await this.UserDataCropAccessor.get(step.context);
 
-        if (userDataCrop.crop == undefined) {
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context);
+        console.log('userDataCrop',userDataCrop);
+
+        if (!userDataCrop || userDataCrop.crop == undefined) {
 
             let option = await displayCropOptions(step.context);
+            console.log('option',option);
+
             if (option)
                 return await step.next();
         } else {
             return await step.next();
         }
     }
-    async handleCropData(turnContext) {
+    async handleCropData(step) {
+        console.log('handleCropData');
+        var turnContext= step.context;
         const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
         const reply = { type: ActivityTypes.Message };
 
@@ -88,6 +101,7 @@ class CropData extends ComponentDialog {
     }
 
     async displayCropOptions(turnContext) {
+        console.log('displayCropOptions');
         const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
         const reply = { type: ActivityTypes.Message };
 
@@ -99,6 +113,7 @@ class CropData extends ComponentDialog {
             buttons, { text: 'You select one of the following choices.' });
 
         reply.attachments = [card];
+        console.log('send card');
 
         await turnContext.sendActivity(reply);
     }
