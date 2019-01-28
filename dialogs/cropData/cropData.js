@@ -1,4 +1,5 @@
 const { ComponentDialog, WaterfallDialog, AttachmentPrompt } = require('botbuilder-dialogs');
+const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
 
 const { UserDataCrop } = require('./userDataCrop');
 const path = require('path');
