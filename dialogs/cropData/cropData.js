@@ -87,8 +87,8 @@ class CropData extends ComponentDialog {
 
         const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
         const text = turnContext.activity.text;
-        let idCrop = cropList.find(x => x.id == userDataCrop.crop.id);
-        console.log("idCrop", idCrop);
+        let crop = cropList.find(x => x.id == text);
+        console.log("idCrop", crop);
         /* if (idCrop == undefined)
              return await displayCropOptions(turnContext);
          if (idCrop != undefined)
