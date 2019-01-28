@@ -1,4 +1,4 @@
-const { ComponentDialog, WaterfallDialog, AttachmentPrompt } = require('botbuilder-dialogs');
+const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, DateTimePrompt } = require('botbuilder-dialogs');
 const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
 
 const { UserDataCrop } = require('./userDataCrop');
@@ -10,7 +10,10 @@ const CROP_DIALOG = 'profileDialog';
 
 // Prompt IDs
 const ATTACHMENT_PROMPT = 'attachmentPrompt';
-const VARIETY_PROMPT = 'cityPrompt';
+const SELECTION_PROMPT = 'selectionPrompt';
+const DATE_PROMPT = 'datePrompt';
+
+const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
 
 class CropData extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
@@ -29,6 +32,9 @@ class CropData extends ComponentDialog {
             this.handleCropData.bind(this)
         ]));
         this.addDialog(new AttachmentPrompt(ATTACHMENT_PROMPT));
+        this.addDialog(new ChoicePrompt(SELECTION_PROMPT));
+        this.addDialog(new DateTimePrompt(DATE_PROMPT));
+
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
 
@@ -72,20 +78,23 @@ class CropData extends ComponentDialog {
         console.log('userDataCrop', userDataCrop);
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
-
-            await this.displayCropOptions(step.context);
-            return await step.next();
+            var list = cropList.map((crop) => {
+                var object = {};
+                object[crop.name] = crop;
+                return object;
+            });
+            // await this.displayCropOptions(step.context);
+            return await step.prompt(SELECTION_PROMPT, "Select Crop:", list);
         } else {
             return await step.next();
         }
     }
     async handleCropData(step) {
-        console.log('handleCropData');
+        console.log('handleCropData', step.options);
+
         var turnContext = step.context;
         const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
-        const reply = { type: ActivityTypes.Message };
 
-        const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
         const text = turnContext.activity.text;
         let crop = cropList.find(x => x.id == text);
         console.log("idCrop", crop);
@@ -96,13 +105,12 @@ class CropData extends ComponentDialog {
          else
              await dc.beginDialog(promptForCropStep);*/
         //return await step.();  
-        step.endDialog();
+        return await step.endDialog();
 
     }
 
     async displayCropOptions(turnContext) {
         console.log('displayCropOptions');
-        const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
         const reply = { type: ActivityTypes.Message };
 
         let buttons = cropList.map((crop) => {
@@ -164,6 +172,37 @@ class CropData extends ComponentDialog {
             localPath: localFileName
         };
     }
+
+
+    async dateValidator(promptContext) {
+        // Check whether the input could be recognized as an integer.
+        if (!promptContext.recognized.succeeded) {
+            await promptContext.context.sendActivity(
+                "I'm sorry, I do not understand. Please enter the date or time for your reservation.");
+            return false;
+        }
+
+        // Check whether any of the recognized date-times are appropriate,
+        // and if so, return the first appropriate date-time.
+        const earliest = Date.now();
+        let value = null;
+        promptContext.recognized.value.forEach(candidate => {
+            // TODO: update validation to account for time vs date vs date-time vs range.
+            const time = new Date(candidate.value || candidate.start);
+            if (time.getTime() < earliest) {
+                value = candidate;
+            }
+        });
+        if (value) {
+            promptContext.recognized.value = [value];
+            return true;
+        }
+
+        await promptContext.context.sendActivity(
+            "I'm sorry, we can't take date later than now.");
+        return false;
+    }
+
 
 }
 
