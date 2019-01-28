@@ -24,7 +24,8 @@ class Bot {
     async onTurn(turnContext) {
         if (turnContext.activity.type === ActivityTypes.Message) {
             let dialogResult;
-            const dc = await this.dialogs.createContext(context);
+            const dc = await this.dialogs.createContext(turnContext);
+
             if (dc.activeDialog)
                 dialogResult = await dc.continueDialog();
             if (!dc.context.responded) {
