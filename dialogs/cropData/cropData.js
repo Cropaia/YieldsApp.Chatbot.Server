@@ -29,11 +29,12 @@ class CropData extends ComponentDialog {
             this.initializeStateStep.bind(this),
             this.promptForAttachmentStep.bind(this),
             this.promptForCropStep.bind(this),
-            this.handleCropData.bind(this)
+            this.promptForDateStep.bind(this),
+            this.endCropDialog.bind(this)
         ]));
         this.addDialog(new AttachmentPrompt(ATTACHMENT_PROMPT));
         this.addDialog(new ChoicePrompt(SELECTION_PROMPT));
-        this.addDialog(new DateTimePrompt(DATE_PROMPT));
+        this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator));
 
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
@@ -67,7 +68,7 @@ class CropData extends ComponentDialog {
         }
     }
     async promptForCropStep(step) {
-        console.log('promptForCropStep');
+        console.log('promptForCropStep', step.result);
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
             console.log('_handleIncomingAttachment');
 
@@ -79,53 +80,46 @@ class CropData extends ComponentDialog {
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
             let list = cropList.map((crop) => {
-               // var object = {};
+                // var object = {};
                 //object[crop.name] = crop;
                 return crop.name;
             });
             console.log('list', list);
 
             // await this.displayCropOptions(step.context);
-            return await step.prompt(SELECTION_PROMPT, "Select Crop:", list);
+            return await step.prompt(SELECTION_PROMPT, {
+                prompt: 'select crop:',
+                retryPrompt: 'Please choose an option from the list.',
+                choices: list
+            });
         } else {
             return await step.next();
         }
     }
-    async handleCropData(step) {
-        console.log('handleCropData', step.options);
-
-        var turnContext = step.context;
+    async promptForDateStep(step) {
+        console.log('promptForDateStep', step.result);
         const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
 
-        const text = turnContext.activity.text;
+        const text = step.context.activity.text;
         let crop = cropList.find(x => x.name == text);
-        console.log("idCrop", crop);
-        /* if (idCrop == undefined)
-             return await displayCropOptions(turnContext);
-         if (idCrop != undefined)
-             step.endDialog();
-         else
-             await dc.beginDialog(promptForCropStep);*/
-        //return await step.();  
-        return await step.endDialog();
+        userDataCrop.crop = crop;
+        console.log('userDataCrop', userDataCrop);
 
+        if (userDataCrop.date == undefined) {
+            return await step.prompt(DATE_PROMPT, 'please enter planting date');
+        } else {
+            return await step.next();
+        }
     }
 
-    async displayCropOptions(turnContext) {
-        console.log('displayCropOptions');
-        const reply = { type: ActivityTypes.Message };
+    async endCropDialog(step) {
+        console.log("endCropDialog", step.result);
+        userDataCrop.date = step.context.activity.text;
 
-        let buttons = cropList.map((crop) => {
-            return { type: ActionTypes.ImBack, title: `${crop.id}.${crop.name}`, value: crop.id };
-        });
+        await step.context.sendActivity('Thank you for you time.');
 
-        const card = CardFactory.heroCard('', undefined,
-            buttons, { text: 'You select one of the following choices.' });
+        return await step.endDialog();
 
-        reply.attachments = [card];
-        console.log('send card');
-
-        await turnContext.sendActivity(reply);
     }
 
 
@@ -180,7 +174,7 @@ class CropData extends ComponentDialog {
         // Check whether the input could be recognized as an integer.
         if (!promptContext.recognized.succeeded) {
             await promptContext.context.sendActivity(
-                "I'm sorry, I do not understand. Please enter the date or time for your reservation.");
+                "I'm sorry, I do not understand. Please enter the date or time for your planting date.");
             return false;
         }
 
