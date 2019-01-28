@@ -1,7 +1,9 @@
 const { ComponentDialog, WaterfallDialog, AttachmentPrompt } = require('botbuilder-dialogs');
 
 const { UserDataCrop } = require('./userDataCrop');
-
+const path = require('path');
+const axios = require('axios');
+const fs = require('fs');
 // Dialog IDs 
 const CROP_DIALOG = 'profileDialog';
 
@@ -66,12 +68,12 @@ class CropData extends ComponentDialog {
         }
 
         const userDataCrop = await this.UserDataCropAccessor.get(step.context);
-        console.log('userDataCrop',userDataCrop);
+        console.log('userDataCrop', userDataCrop);
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
 
             let option = await displayCropOptions(step.context);
-            console.log('option',option);
+            console.log('option', option);
 
             if (option)
                 return await step.next();
@@ -81,7 +83,7 @@ class CropData extends ComponentDialog {
     }
     async handleCropData(step) {
         console.log('handleCropData');
-        var turnContext= step.context;
+        var turnContext = step.context;
         const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
         const reply = { type: ActivityTypes.Message };
 
@@ -135,7 +137,35 @@ class CropData extends ComponentDialog {
         const replyPromises = successfulSaves.map(replyForReceivedAttachments.bind(turnContext));
         await Promise.all(replyPromises);
     }
+    /**
+       * Downloads attachment to the disk.
+       * @param {Object} attachment
+       */
+    async downloadAttachmentAndWrite(attachment) {
+        // Retrieve the attachment via the attachment's contentUrl.
+        const url = attachment.contentUrl;
 
+        // Local file path for the bot to save the attachment.
+        const localFileName = path.join(__dirname +"attachments", attachment.name);
+
+        try {
+            const response = await axios.get(url);
+            fs.writeFile(localFileName, response.data, (fsError) => {
+                if (fsError) {
+                    throw fsError;
+                }
+            });
+        } catch (error) {
+            console.error(error);
+            return undefined;
+        }
+        // If no error was thrown while writing to disk, return the attachment's name
+        // and localFilePath for the response back to the user.
+        return {
+            fileName: attachment.name,
+            localPath: localFileName
+        };
+    }
 
 }
 
