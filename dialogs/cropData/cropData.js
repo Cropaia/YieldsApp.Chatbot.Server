@@ -72,7 +72,7 @@ class CropData extends ComponentDialog {
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
 
-            let option = await displayCropOptions(step.context);
+            let option = await this.displayCropOptions(step.context);
             console.log('option', option);
 
             if (option)
