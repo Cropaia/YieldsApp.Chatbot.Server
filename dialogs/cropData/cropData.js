@@ -71,18 +71,20 @@ class CropData extends ComponentDialog {
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
             console.log('_handleIncomingAttachment');
 
-            await this._handleIncomingAttachment(step.context);
+            //await this._handleIncomingAttachment(step.context);
         }
 
         const userDataCrop = await this.UserDataCropAccessor.get(step.context);
         console.log('userDataCrop', userDataCrop);
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
-            var list = cropList.map((crop) => {
+            let list = cropList.map((crop) => {
                 var object = {};
                 object[crop.name] = crop;
                 return object;
             });
+            console.log('list', list);
+
             // await this.displayCropOptions(step.context);
             return await step.prompt(SELECTION_PROMPT, "Select Crop:", list);
         } else {
