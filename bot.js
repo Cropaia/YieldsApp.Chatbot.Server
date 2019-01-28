@@ -52,8 +52,8 @@ class Bot {
             await turnContext.sendActivity(`[${turnContext.activity.type} event detected]`);
         }
 
-        await this.conversationState.saveChanges(context);
-        await this.userState.saveChanges(context);
+        await this.conversationState.saveChanges(turnContext);
+        await this.userState.saveChanges(turnContext);
     }
 }
 
