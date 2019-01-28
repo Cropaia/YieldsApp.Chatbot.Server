@@ -43,6 +43,8 @@ class Bot {
 
                 switch (dialogResult.status) {
                     case DialogTurnStatus.empty:
+                        console.log("5 beginDialog starting");
+
                         await dc.beginDialog(CROPDATA_DIALOG);
                         console.log("5 beginDialog");
 
