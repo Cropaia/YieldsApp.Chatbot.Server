@@ -42,13 +42,18 @@ class Bot {
                 }
             }
 
+        } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate &&
+            turnContext.activity.recipient.id === turnContext.activity.membersAdded[0].id && turnContext.activity.recipient.name === turnContext.activity.membersAdded[0].name) {
+            // If the Activity is a ConversationUpdate, send a greeting message to the user.
+            await turnContext.sendActivity('Welcome to the identification module! please upload image of the crop');
         } else {
             // Generic handler for all other activity types.
             await turnContext.sendActivity(`[${turnContext.activity.type} event detected]`);
         }
 
         await this.conversationState.saveChanges(context);
-        await this.userState.saveChanges(context);    }
+        await this.userState.saveChanges(context);
+    }
 }
 
 exports.Bot = Bot;
