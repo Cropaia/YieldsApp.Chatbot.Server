@@ -146,7 +146,7 @@ class CropData extends ComponentDialog {
         const url = attachment.contentUrl;
 
         // Local file path for the bot to save the attachment.
-        const localFileName = path.join(__dirname +"attachments", attachment.name);
+        const localFileName = path.join(__dirname, "attachments", attachment.name);
 
         try {
             const response = await axios.get(url);
