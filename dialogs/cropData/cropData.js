@@ -98,7 +98,7 @@ class CropData extends ComponentDialog {
     }
     async promptForDateStep(step) {
         console.log('promptForDateStep', step.result);
-        const userDataCrop = await this.UserDataCropAccessor.get(turnContext)
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context)
 
         const text = step.context.activity.text;
         let crop = cropList.find(x => x.name == text);
