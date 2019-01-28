@@ -12,26 +12,40 @@ const { CropDataDialog } = require('./dialogs/cropData/cropData');
 class Bot {
 
     constructor(conversationState, userState) {
-        this.conversationState = conversationState;
-
+        if (!conversationState) throw new Error('Missing parameter.  conversationState is required');
+        if (!userState) throw new Error('Missing parameter.  userState is required');
+        
         this.userCropDataAccessor = userState.createProperty(USER_CROP_DATA_PROPERTY);
         this.dialogState = conversationState.createProperty(DIALOG_STATE_PROPERTY);
 
         this.dialogs = new DialogSet(this.dialogState);
         this.dialogs.add(new CropDataDialog(CROPDATA_DIALOG, this.userCropDataAccessor));
+ 
+        this.conversationState = conversationState;
+        this.userState = userState;
     }
 
     async onTurn(turnContext) {
         if (turnContext.activity.type === ActivityTypes.Message) {
             let dialogResult;
             const dc = await this.dialogs.createContext(turnContext);
+            console.log("1 dc.activeDialog",dc.activeDialog);
 
-            if (dc.activeDialog)
+            if (dc.activeDialog){
                 dialogResult = await dc.continueDialog();
+                console.log("2 continueDialog dialogResult",dialogResult);
+
+            }
+            console.log("3 dc.context.responded",dc.context.responded);
+
             if (!dc.context.responded) {
+                console.log("4 dialogResult.status",dialogResult.status);
+
                 switch (dialogResult.status) {
                     case DialogTurnStatus.empty:
                         await dc.beginDialog(CROPDATA_DIALOG);
+                        console.log("5 beginDialog");
+
                         break;
                     case DialogTurnStatus.waiting:
                         break;
@@ -39,6 +53,8 @@ class Bot {
                         break;
                     default:
                         await dc.cancelAllDialogs();
+                        console.log("6 cancelAllDialogs");
+
                         break;
                 }
             }
