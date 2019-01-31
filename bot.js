@@ -15,7 +15,7 @@ class Bot {
         if (!conversationState) throw new Error('Missing parameter.  conversationState is required');
         if (!userState) throw new Error('Missing parameter.  userState is required');
 
-        this.userCropDataAccessor = userState.createProperty(USER_CROP_DATA_PROPERTY);
+        this.userCropDataAccessor = conversationState.createProperty(USER_CROP_DATA_PROPERTY);
         this.dialogState = conversationState.createProperty(DIALOG_STATE_PROPERTY);
 
         this.dialogs = new DialogSet(this.dialogState);

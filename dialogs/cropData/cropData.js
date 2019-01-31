@@ -99,10 +99,12 @@ class CropData extends ComponentDialog {
     async promptForDateStep(step) {
         console.log('promptForDateStep', step.result);
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-
-        const text = step.result.value;
-        let crop = cropList.find(x => x.name == text);
-        userDataCrop.crop = crop;
+        if (userDataCrop.crop == undefined &&  step.result) {
+            const text = step.result.value;
+            let crop = cropList.find(x => x.name == text);
+            userDataCrop.crop = crop;
+        }
+        
         console.log('userDataCrop', userDataCrop);
 
         if (userDataCrop.date == undefined) {
@@ -115,12 +117,12 @@ class CropData extends ComponentDialog {
     async endCropDialog(step) {
         console.log("endCropDialog", step.result);
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-        userDataCrop.date = step.result.value;
+        if (userDataCrop.date == undefined &&  step.result) {
+            userDataCrop.date = step.result.value;
+        }
 
         await step.context.sendActivity('Thank you for you time.');
-
         return await step.endDialog();
-
     }
 
 
