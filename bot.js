@@ -26,6 +26,7 @@ class Bot {
 
         this.conversationState = conversationState;
         this.userState = userState;
+        this.dialogIndex = 0;
     }
 
     async onTurn(turnContext) {
