@@ -65,7 +65,6 @@ class Bot {
                 }
             } else {
                 if (dialogResult.status == DialogTurnStatus.complete) {
-                    console.log("7 beginDialog starting (complete)");
                     await this.beginNextDialog(dc);
                     console.log("7  end of beginDialog (complete)");
                 }

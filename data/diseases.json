@@ -1,0 +1,47 @@
+[{
+    "id": 1,
+    "pathogenName" : "Alternaria",
+    "region" : ["us"],
+    "temperature" : {
+        "min":"24",
+        "max" : "29"
+    },
+    "humidity":{
+        "min" : "90",
+        "max":""
+    },
+    "growthStage":{
+    },
+    "locationTypes": [
+        {
+            "locationType":  "leaves",
+            "symptomLocation": ["upper","lower"],
+            "symptomLocationSide": ["upper"],
+            "symptomLocationSurface": null,
+            "type": ["necrosis","chlorosis","lesions","spots"]
+        }
+    ]
+},{
+    "id": 2,
+    "pathogenName" : "Pytophthora infestans",
+    "region" : ["us"],
+    "temperature" : {
+        "min":"15",
+        "max" : "25"
+    },
+    "humidity":{
+        "min" : "95",
+        "max":""
+    },
+    "growthStage":{
+    },
+    "locationTypes": [
+        {
+            "locationType":  "leaves",
+            "symptomLocation": null,
+            "symptomLocationSide":null,
+            "symptomLocationSurface": null,
+            "type": ["blotches","lesions"]
+        }
+    ]
+}]
