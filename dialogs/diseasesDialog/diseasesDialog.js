@@ -20,8 +20,9 @@ class DiseasesDialog extends ComponentDialog {
         // validate what was passed in
         if (!dialogId) throw ('Missing parameter.  dialogId is required');
         if (!UserDataCropAccessor) throw ('Missing parameter.  UserDataCropAccessor is required');
+        let userData = await this.UserDataCropAccessor.get(step.context);
 
-        console.log("constructor of DiseasesDialog");
+        console.log("constructor of DiseasesDialog", userData);
 
         // this.addDialog(new WaterfallDialog(CROP_DIALOG, [
         //     this.initializeStateStep.bind(this),

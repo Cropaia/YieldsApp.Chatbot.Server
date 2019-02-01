@@ -4,8 +4,11 @@ const { DialogSet, DialogTurnStatus } = require('botbuilder-dialogs');
 const DIALOG_STATE_PROPERTY = 'dialogState';
 const USER_CROP_DATA_PROPERTY = 'userCropDataProperty';
 
-const CROPDATA_DIALOG = 'cropdataDialog';
+const CROP_DIALOG = 'cropdataDialog';
+const DISEASES_DIALOG = 'diseasesDialog';
 
+const dialogsList = [CROP_DIALOG, DISEASES_DIALOG];
+let dialogIndex = 0;
 const { CropDialog } = require('./dialogs/cropDialog');
 
 class Bot {
@@ -18,7 +21,8 @@ class Bot {
         this.dialogState = conversationState.createProperty(DIALOG_STATE_PROPERTY);
 
         this.dialogs = new DialogSet(this.dialogState);
-        this.dialogs.add(new CropDialog(CROPDATA_DIALOG, this.userCropDataAccessor));
+        this.dialogs.add(new CropDialog(CROP_DIALOG, this.userCropDataAccessor));
+        this.dialogs.add(new CropDialog(DISEASES_DIALOG, this.userCropDataAccessor));
 
         this.conversationState = conversationState;
         this.userState = userState;
@@ -44,13 +48,14 @@ class Bot {
                     case DialogTurnStatus.empty:
                         console.log("5 beginDialog starting");
 
-                        await dc.beginDialog(CROPDATA_DIALOG);
+                        await dc.beginDialog(dialogsList[dialogIndex++]);
                         console.log("5 beginDialog");
 
                         break;
                     case DialogTurnStatus.waiting:
                         break;
                     case DialogTurnStatus.complete:
+
                         break;
                     default:
                         await dc.cancelAllDialogs();
