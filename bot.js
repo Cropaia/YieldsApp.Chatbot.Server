@@ -49,14 +49,14 @@ class Bot {
                     case DialogTurnStatus.empty:
                         console.log("5 beginDialog starting");
                         await this.beginNextDialog(dc);
-                        console.log("5 beginDialog");
+                        console.log("5 beginDialog end");
                         break;
                     case DialogTurnStatus.waiting:
                         break;
                     case DialogTurnStatus.complete:
-                        console.log("5 beginDialog starting (complete)");
-                        await this.beginNextDialog(dc);
-                        console.log("5  end of beginDialog (complete)");
+                        // console.log("5 beginDialog starting (complete)");
+                        // await this.beginNextDialog(dc);
+                        // console.log("5  end of beginDialog (complete)");
                         break;
                     default:
                         await dc.cancelAllDialogs();
@@ -86,10 +86,10 @@ class Bot {
 
 
     async beginNextDialog(dc) {
-        console.log("beginNextDialog", dialogIndex, dialogsList[dialogIndex++])
+        console.log("beginNextDialog", dialogIndex, dialogsList[dialogIndex])
         if (dialogIndex < dialogsList.length)
             await dc.beginDialog(dialogsList[dialogIndex++]);
-        console.log("beginNextDialog2", dialogIndex, dialogsList[dialogIndex++])
+        console.log("beginNextDialog2", dialogIndex, dialogsList[dialogIndex])
 
     }
 }
