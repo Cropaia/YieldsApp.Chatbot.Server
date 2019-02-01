@@ -75,6 +75,7 @@ class Bot {
             turnContext.activity.recipient.id === turnContext.activity.membersAdded[0].id && turnContext.activity.recipient.name === turnContext.activity.membersAdded[0].name) {
             // If the Activity is a ConversationUpdate, send a greeting message to the user.
             await turnContext.sendActivity('Welcome to the identification module! please upload image of the crop');
+            this.dialogIndex = 0;
         } /*else {
             // Generic handler for all other activity types.
             await turnContext.sendActivity(`[${turnContext.activity.type} event detected]`);
