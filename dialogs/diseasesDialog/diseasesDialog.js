@@ -22,10 +22,14 @@ class DiseasesDialog extends ComponentDialog {
         if (!UserDataCropAccessor) throw ('Missing parameter.  UserDataCropAccessor is required');
 
         console.log("constructor of DiseasesDialog");
-       
+
         this.addDialog(new WaterfallDialog(DISEASE_DIALOG, [
+            this.promptForDate2Step.bind(this),
             this.endDiseaseDialog.bind(this),
         ]));
+
+        this.addDialog(new DateTimePrompt(DATE_PROMPT));
+
         // this.addDialog(new WaterfallDialog(CROP_DIALOG, [
         //     this.initializeStateStep.bind(this),
         //     this.promptForAttachmentStep.bind(this),
@@ -39,11 +43,21 @@ class DiseasesDialog extends ComponentDialog {
 
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
+
+    async promptForDate2Step(step) {
+        console.log(DISEASE_DIALOG +'promptForDate2Step');
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context)
+
+        console.log('userDataCrop', userDataCrop);
+
+        return await step.prompt(DATE_PROMPT, 'please enter planting date2');
+
+    }
     async endDiseaseDialog(step) {
-        console.log(DISEASE_DIALOG+ " initializeStateStep");
+        console.log(DISEASE_DIALOG + " initializeStateStep");
 
         let userData = await this.UserDataCropAccessor.get(step.context);
-        console.log("userData",userData);
+        console.log("userData", userData);
 
         return await step.endDialog();
     }
