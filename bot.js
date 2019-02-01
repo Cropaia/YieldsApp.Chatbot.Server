@@ -47,14 +47,14 @@ class Bot {
                 switch (dialogResult.status) {
                     case DialogTurnStatus.empty:
                         console.log("5 beginDialog starting");
-                        await beginNextDialog(dc);
+                        await this.beginNextDialog(dc);
                         console.log("5 beginDialog");
                         break;
                     case DialogTurnStatus.waiting:
                         break;
                     case DialogTurnStatus.complete:
                         console.log("5 beginDialog starting (complete)");
-                        await beginNextDialog(dc);
+                        await this.beginNextDialog(dc);
                         console.log("5  end of beginDialog (complete)");
                         break;
                     default:
