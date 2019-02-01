@@ -87,10 +87,8 @@ class Bot {
 
     async beginNextDialog(dc) {
         console.log("beginNextDialog", dialogIndex, dialogsList[dialogIndex++])
-        if (dialogIndex != dialogsList.length)
+        if (dialogIndex < dialogsList.length)
             await dc.beginDialog(dialogsList[dialogIndex++]);
-        else
-            await dc.endDialog();
         console.log("beginNextDialog2", dialogIndex, dialogsList[dialogIndex++])
 
     }
