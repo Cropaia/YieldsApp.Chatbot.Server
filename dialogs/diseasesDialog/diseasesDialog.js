@@ -6,7 +6,7 @@ const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
 // Dialog IDs 
-const CROP_DIALOG = 'profileDialog';
+const DISEASE_DIALOG = 'profileDialog';
 
 // Prompt IDs
 const ATTACHMENT_PROMPT = 'attachmentPrompt';
@@ -20,10 +20,12 @@ class DiseasesDialog extends ComponentDialog {
         // validate what was passed in
         if (!dialogId) throw ('Missing parameter.  dialogId is required');
         if (!UserDataCropAccessor) throw ('Missing parameter.  UserDataCropAccessor is required');
-        let userData = await this.UserDataCropAccessor.get(step.context);
 
-        console.log("constructor of DiseasesDialog", userData);
-
+        console.log("constructor of DiseasesDialog");
+       
+        this.addDialog(new WaterfallDialog(DISEASE_DIALOG, [
+            this.endDiseaseDialog.bind(this),
+        ]));
         // this.addDialog(new WaterfallDialog(CROP_DIALOG, [
         //     this.initializeStateStep.bind(this),
         //     this.promptForAttachmentStep.bind(this),
@@ -36,6 +38,14 @@ class DiseasesDialog extends ComponentDialog {
         // this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator));
 
         this.UserDataCropAccessor = UserDataCropAccessor;
+    }
+    async endDiseaseDialog(step) {
+        console.log(DISEASE_DIALOG+ " initializeStateStep");
+
+        let userData = await this.UserDataCropAccessor.get(step.context);
+        console.log("userData",userData);
+
+        return await step.endDialog();
     }
 
 }

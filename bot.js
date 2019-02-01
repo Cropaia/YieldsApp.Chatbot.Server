@@ -47,20 +47,19 @@ class Bot {
                 switch (dialogResult.status) {
                     case DialogTurnStatus.empty:
                         console.log("5 beginDialog starting");
-
-                        await dc.beginDialog(dialogsList[dialogIndex++]);
+                        beginNextDialog(dc);
                         console.log("5 beginDialog");
-
                         break;
                     case DialogTurnStatus.waiting:
                         break;
                     case DialogTurnStatus.complete:
-
+                        console.log("5 beginDialog starting (complete)");
+                        beginNextDialog(dc);
+                        console.log("5  end of beginDialog (complete)");
                         break;
                     default:
                         await dc.cancelAllDialogs();
                         console.log("6 cancelAllDialogs");
-
                         break;
                 }
             }
@@ -77,6 +76,17 @@ class Bot {
         await this.conversationState.saveChanges(turnContext);
         await this.userState.saveChanges(turnContext);
     }
+
+
+    beginNextDialog(dc) {
+        if (dialogIndex != dialogsList.length)
+            await dc.beginDialog(dialogsList[dialogIndex++]);
+        else
+            await dc.endDialog();
+    }
 }
+
+
+
 
 exports.Bot = Bot;

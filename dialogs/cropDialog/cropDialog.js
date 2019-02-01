@@ -120,7 +120,7 @@ class CropDialog extends ComponentDialog {
             userDataCrop.plantingDate = step.result.value;
         }
 
-        await step.context.sendActivity('Thank you for you time.');
+        await step.context.sendActivity('Thank you for your time.');
         return await step.endDialog();
     }
 
