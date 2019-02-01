@@ -62,6 +62,12 @@ class Bot {
                         console.log("6 cancelAllDialogs");
                         break;
                 }
+            } else {
+                if (dialogResult.status == DialogTurnStatus.complete) {
+                    console.log("7 beginDialog starting (complete)");
+                    await this.beginNextDialog(dc);
+                    console.log("7  end of beginDialog (complete)");
+                }
             }
 
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate &&
