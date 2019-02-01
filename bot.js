@@ -8,7 +8,6 @@ const CROP_DIALOG = 'cropdataDialog';
 const DISEASES_DIALOG = 'diseasesDialog';
 
 const dialogsList = [CROP_DIALOG, DISEASES_DIALOG];
-let dialogIndex = 0;
 const { CropDialog } = require('./dialogs/cropDialog');
 const { DiseasesDialog } = require('./dialogs/diseasesDialog');
 
@@ -87,10 +86,10 @@ class Bot {
 
 
     async beginNextDialog(dc) {
-        console.log("beginNextDialog", dialogIndex, dc.activeDialog, dialogsList[dialogIndex])
-        if (dialogIndex < dialogsList.length)
-            await dc.beginDialog(dialogsList[dialogIndex++]);
-        console.log("beginNextDialog2", dialogIndex, dc.activeDialog, dialogsList[dialogIndex])
+        console.log("beginNextDialog", this.dialogIndex, dc.activeDialog, dialogsList[this.dialogIndex])
+        if (this.dialogIndex < dialogsList.length)
+            await dc.beginDialog(dialogsList[this.dialogIndex++]);
+        console.log("beginNextDialog2", this.dialogIndex, dc.activeDialog, dialogsList[this.dialogIndex])
 
     }
 }
