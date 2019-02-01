@@ -6,8 +6,7 @@ const USER_CROP_DATA_PROPERTY = 'userCropDataProperty';
 
 const CROPDATA_DIALOG = 'cropdataDialog';
 
-const { UserDataCrop } = require('./dialogs/cropData/userDataCrop');
-const { CropDataDialog } = require('./dialogs/cropData/cropData');
+const { CropDialog } = require('./dialogs/cropDialog');
 
 class Bot {
 
@@ -19,7 +18,7 @@ class Bot {
         this.dialogState = conversationState.createProperty(DIALOG_STATE_PROPERTY);
 
         this.dialogs = new DialogSet(this.dialogState);
-        this.dialogs.add(new CropDataDialog(CROPDATA_DIALOG, this.userCropDataAccessor));
+        this.dialogs.add(new CropDialog(CROPDATA_DIALOG, this.userCropDataAccessor));
 
         this.conversationState = conversationState;
         this.userState = userState;

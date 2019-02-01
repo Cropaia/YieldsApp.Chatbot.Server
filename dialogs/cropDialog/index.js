@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-const { CropDataDialog } = require('./cropData');
+const { CropDialog } = require('./cropDialog');
 
-exports.CropDataDialog = CropDataDialog;
+exports.CropDialog = CropDialog;

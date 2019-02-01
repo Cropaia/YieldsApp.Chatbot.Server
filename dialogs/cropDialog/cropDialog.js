@@ -1,7 +1,6 @@
 const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, DateTimePrompt } = require('botbuilder-dialogs');
-const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
 
-const { UserDataCrop } = require('./userDataCrop');
+const { AnswersData } = require('../../data/answersData');
 const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
@@ -15,7 +14,7 @@ const DATE_PROMPT = 'datePrompt';
 
 const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
 
-class CropData extends ComponentDialog {
+class CropDialog extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
         super(dialogId);
 
@@ -23,7 +22,7 @@ class CropData extends ComponentDialog {
         if (!dialogId) throw ('Missing parameter.  dialogId is required');
         if (!UserDataCropAccessor) throw ('Missing parameter.  UserDataCropAccessor is required');
 
-        console.log("constructor of CropData");
+        console.log("constructor of CropDialog");
 
         this.addDialog(new WaterfallDialog(CROP_DIALOG, [
             this.initializeStateStep.bind(this),
@@ -44,7 +43,7 @@ class CropData extends ComponentDialog {
 
         let userData = await this.UserDataCropAccessor.get(step.context);
         if (userData === undefined) {
-            await this.UserDataCropAccessor.set(step.context, new UserDataCrop());
+            await this.UserDataCropAccessor.set(step.context, new AnswersData());
         }
         return await step.next();
     }
@@ -107,7 +106,7 @@ class CropData extends ComponentDialog {
         
         console.log('userDataCrop', userDataCrop);
 
-        if (userDataCrop.date == undefined) {
+        if (userDataCrop.plantingDate == undefined) {
             return await step.prompt(DATE_PROMPT, 'please enter planting date');
         } else {
             return await step.next();
@@ -117,8 +116,8 @@ class CropData extends ComponentDialog {
     async endCropDialog(step) {
         console.log("endCropDialog", step.result);
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-        if (userDataCrop.date == undefined &&  step.result) {
-            userDataCrop.date = step.result.value;
+        if (userDataCrop.plantingDate == undefined &&  step.result) {
+            userDataCrop.plantingDate = step.result.value;
         }
 
         await step.context.sendActivity('Thank you for you time.');
@@ -205,4 +204,4 @@ class CropData extends ComponentDialog {
 
 }
 
-exports.CropDataDialog = CropData;
+exports.CropDialog = CropDialog;
