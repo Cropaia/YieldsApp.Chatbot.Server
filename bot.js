@@ -10,6 +10,7 @@ const DISEASES_DIALOG = 'diseasesDialog';
 const dialogsList = [CROP_DIALOG, DISEASES_DIALOG];
 let dialogIndex = 0;
 const { CropDialog } = require('./dialogs/cropDialog');
+const { DiseasesDialog } = require('./dialogs/diseasesDialog');
 
 class Bot {
 
@@ -22,7 +23,7 @@ class Bot {
 
         this.dialogs = new DialogSet(this.dialogState);
         this.dialogs.add(new CropDialog(CROP_DIALOG, this.userCropDataAccessor));
-        this.dialogs.add(new CropDialog(DISEASES_DIALOG, this.userCropDataAccessor));
+        this.dialogs.add(new DiseasesDialog(DISEASES_DIALOG, this.userCropDataAccessor));
 
         this.conversationState = conversationState;
         this.userState = userState;
@@ -86,10 +87,10 @@ class Bot {
 
 
     async beginNextDialog(dc) {
-        console.log("beginNextDialog", dialogIndex, dialogsList[dialogIndex])
+        console.log("beginNextDialog", dialogIndex, dc.activeDialog, dialogsList[dialogIndex])
         if (dialogIndex < dialogsList.length)
             await dc.beginDialog(dialogsList[dialogIndex++]);
-        console.log("beginNextDialog2", dialogIndex, dialogsList[dialogIndex])
+        console.log("beginNextDialog2", dialogIndex, dc.activeDialog, dialogsList[dialogIndex])
 
     }
 }
