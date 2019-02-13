@@ -26,30 +26,24 @@ class Bot {
 
         this.conversationState = conversationState;
         this.userState = userState;
-        this.dialogIndex = 0;
+        this.dialogIndex = 0;       
     }
 
     async onTurn(turnContext) {
         if (turnContext.activity.type === ActivityTypes.Message) {
             let dialogResult;
             const dc = await this.dialogs.createContext(turnContext);
-            console.log("1 dc.activeDialog", dc.activeDialog);
 
             //if (dc.activeDialog){
             dialogResult = await dc.continueDialog();
-            console.log("2 continueDialog dialogResult", dialogResult);
 
             //}
-            console.log("3 dc.context.responded", dc.context.responded);
 
             if (!dc.context.responded) {
-                console.log("4 dialogResult.status", dialogResult.status);
 
                 switch (dialogResult.status) {
                     case DialogTurnStatus.empty:
-                        console.log("5 beginDialog starting");
                         await this.beginNextDialog(dc);
-                        console.log("5 beginDialog end");
                         break;
                     case DialogTurnStatus.waiting:
                         break;
@@ -60,13 +54,11 @@ class Bot {
                         break;
                     default:
                         await dc.cancelAllDialogs();
-                        console.log("6 cancelAllDialogs");
                         break;
                 }
             } else {
                 if (dialogResult.status == DialogTurnStatus.complete) {
                     await this.beginNextDialog(dc);
-                    console.log("7  end of beginDialog (complete)");
                 }
             }
 
@@ -86,11 +78,8 @@ class Bot {
 
 
     async beginNextDialog(dc) {
-        console.log("beginNextDialog", this.dialogIndex, dc.activeDialog, dialogsList[this.dialogIndex])
         if (this.dialogIndex < dialogsList.length)
             await dc.beginDialog(dialogsList[this.dialogIndex++]);
-        console.log("beginNextDialog2", this.dialogIndex, dc.activeDialog, dialogsList[this.dialogIndex])
-
     }
 }
 

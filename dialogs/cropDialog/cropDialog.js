@@ -4,6 +4,7 @@ const { AnswersData } = require('../../data/answersData');
 const path = require('path');
 const axios = require('axios');
 const fs = require('fs');
+
 // Dialog IDs 
 const CROP_DIALOG = 'profileDialog';
 
@@ -13,11 +14,10 @@ const SELECTION_PROMPT = 'selectionPrompt';
 const DATE_PROMPT = 'datePrompt';
 
 const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
-
+const symptomLocationList = [{ id: 1, name: 'Leaves' }, { id: 2, name: 'Stem' }, { id: 3, name: 'Fruits' }, { id: 4, name: 'Root' }]
 class CropDialog extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
         super(dialogId);
-
         // validate what was passed in
         if (!dialogId) throw ('Missing parameter.  dialogId is required');
         if (!UserDataCropAccessor) throw ('Missing parameter.  UserDataCropAccessor is required');
@@ -29,18 +29,17 @@ class CropDialog extends ComponentDialog {
             this.promptForAttachmentStep.bind(this),
             this.promptForCropStep.bind(this),
             this.promptForDateStep.bind(this),
+            this.promptForSymptomLocationStep.bind(this),
             this.endCropDialog.bind(this)
         ]));
         this.addDialog(new AttachmentPrompt(ATTACHMENT_PROMPT));
         this.addDialog(new ChoicePrompt(SELECTION_PROMPT));
-        this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator));
+        this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator,"he-il"));
 
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
 
     async initializeStateStep(step) {
-        console.log("initializeStateStep");
-
         let userData = await this.UserDataCropAccessor.get(step.context);
         if (userData === undefined) {
             await this.UserDataCropAccessor.set(step.context, new AnswersData());
@@ -96,15 +95,12 @@ class CropDialog extends ComponentDialog {
         }
     }
     async promptForDateStep(step) {
-        console.log('promptForDateStep', step.result);
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-        if (userDataCrop.crop == undefined &&  step.result) {
+        if (userDataCrop.crop == undefined && step.result) {
             const text = step.result.value;
             let crop = cropList.find(x => x.name == text);
             userDataCrop.crop = crop;
         }
-        
-        console.log('userDataCrop', userDataCrop);
 
         if (userDataCrop.plantingDate == undefined) {
             return await step.prompt(DATE_PROMPT, 'please enter planting date');
@@ -113,11 +109,33 @@ class CropDialog extends ComponentDialog {
         }
     }
 
-    async endCropDialog(step) {
-        console.log("endCropDialog", step.result);
+    async promptForSymptomLocationStep(step) {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-        if (userDataCrop.plantingDate == undefined &&  step.result) {
-            userDataCrop.plantingDate = step.result.value;
+        if (userDataCrop.plantingDate == undefined && step.result && step.result.length>0 ) {
+            userDataCrop.plantingDate = step.result[0].value;
+        }
+
+        if (userDataCrop.symptomLocation.length == 0) {
+
+            let list = symptomLocationList.map((crop) => {
+                return crop.name;
+            });
+
+            return await step.prompt(SELECTION_PROMPT, {
+                prompt: 'select symptomLocation:',
+                retryPrompt: 'Please choose an option from the list.',
+                choices: list
+            });
+        } else {
+            return await step.next();
+        }
+    }
+    async endCropDialog(step) {
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context)
+        if (userDataCrop.symptomLocation.length == 0 && step.result) {
+            const text = step.result.value;
+            const symptomLocation = symptomLocationList.find(x => x.name == text);
+            userDataCrop.symptomLocation = symptomLocation;
         }
 
         await step.context.sendActivity('Thank you for your time.');

@@ -14,8 +14,10 @@
     "botbuilder": "^4.1.5",
     "botbuilder-azure": "^4.1.5",
     "botbuilder-dialogs": "^4.2.0",
+    "botbuilder-location": "^2.0.0",
     "botframework-config": "^4.1.5",
     "dotenv": "^6.1.0",
+    "lodash": "^4.17.11",
     "restify": "^7.2.2"
   },
   "devDependencies": {
