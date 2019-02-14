@@ -1,11 +1,12 @@
 class AnswersData {
-    constructor(crop, variety, plantingDate, location) {
+    constructor() {
         this.picture = undefined;
-        this.crop = crop || undefined;
-        this.variety = variety || undefined;
-        this.plantingDate = plantingDate || undefined;
-        this.location = location || {lat: -34.397, lng: 150.644};
-        this.symptomLocation =  [];
+        this.crop = undefined;
+        this.variety = undefined;
+        this.plantingDate = undefined;
+        this.location = { lat: -34.397, lng: 150.644 };
+        this.symptomLocation = [];
+        this.diseasesData = {};
     }
 };
 
