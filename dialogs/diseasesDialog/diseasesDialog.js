@@ -237,17 +237,17 @@ class DiseasesDialog extends ComponentDialog {
     }
 
     _calculateGrowthStageByGDD(crop, GDD) {
-        //return object of growstage : small, old..
         for (let i = 0; i < crop.growthStages.length; i++) {
             const isLastGrowthStage = i + 1 == crop.growthStages.length;
             if (isLastGrowthStage)
                 return crop.growthStages[i];
 
-            const currentMinGDD = crop.growthStages[i].minGDD;
-            const nextMinGDD = crop.growthStages[i + 1].minGDD;
-            if (currentMinGDD < GDD && GDD < nextMinGDD)
+            const fromGDD = crop.growthStages[i].fromGDD;
+            const toGDD = crop.growthStages[i].toGDD;
+            if (fromGDD < GDD && GDD < toGDD)
                 return crop.growthStages[i];
         }
+        return crop.growthStages[0];
     }
 
 

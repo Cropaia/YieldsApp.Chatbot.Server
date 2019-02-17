@@ -2,19 +2,24 @@
     {
         "id": 1,
         "name": "tomato",
-        "minimumTemperatureForGdd": 7,
+        "minimumTemperatureForGdd": 50,
         "growthStages": [
             {
-                "name": "very young",
-                "minGDD": 0
-                
+                "name": "Vegetative",
+                "fromGDD": 30,
+                "toGDD": 450       
             },{
-                "name": "young",
-                "minGDD": 200
-            },
-            {
-                "name": "old",
-                "minGDD": 400
+                "name": "Flowering",
+                "fromGDD": 450,
+                "toGDD": 900
+            },{
+                "name": "Fruit set",
+                "fromGDD": 900,
+                "toGDD": 1200
+            },{
+                "name": "Harvest",
+                "fromGDD": 1200,
+                "toGDD": 6500
             }
         ]
     }
