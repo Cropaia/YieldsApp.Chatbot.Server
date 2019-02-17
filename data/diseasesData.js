@@ -4,15 +4,15 @@ const _ = require('lodash');
 
 class DiseasesData {
     constructor() {
-        this.diseases = this.getDiseases();
-        this.diseasesScoreData = this.getdiseasesScoreData();
+        this.diseases = this._getDiseases();
+        this.diseasesScoreData = this._getdiseasesScoreData();
     }
 
-    getDiseases() {
+    _getDiseases() {
         return diseases;
     }
 
-    getdiseasesScoreData() {
+    _getdiseasesScoreData() {
         return _.map(this.diseases, (disease) => {
             return { id: disease.id, fields: [] }
         });

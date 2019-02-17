@@ -4,17 +4,20 @@
     "region" : ["us"],
     "temperature" : {
         "min":"24",
-        "max" : "29"
+        "max" : "29",
+        "standardDeviationMin": "19",
+        "standardDeviationMax": "35"
     },
     "humidity":{
         "min" : "90",
-        "max":""
+        "max":"",
+        "standardDeviationMin" : "88",
+        "standardDeviationMax": ""
     },
-    "growthStage":{
-    },
+    "growthStage":[],
     "locationTypes": [
         {
-            "locationType":  "leaves",
+            "name":  "leaves",
             "symptomLocation": ["upper","lower"],
             "symptomLocationSide": ["upper"],
             "symptomLocationSurface": null,
@@ -37,7 +40,7 @@
     },
     "locationTypes": [
         {
-            "locationType":  "leaves",
+            "name":  "leaves",
             "symptomLocation": null,
             "symptomLocationSide":null,
             "symptomLocationSurface": null,

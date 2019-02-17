@@ -13,8 +13,9 @@ const ATTACHMENT_PROMPT = 'attachmentPrompt';
 const SELECTION_PROMPT = 'selectionPrompt';
 const DATE_PROMPT = 'datePrompt';
 
-const cropList = [{ id: 1, name: 'tomato' }, { id: 2, name: 'banana' }]
-const symptomLocationList = [{ id: 1, name: 'Leaves' }, { id: 2, name: 'Stem' }, { id: 3, name: 'Fruits' }, { id: 4, name: 'Root' }]
+const cropList = require('./../../data/crop.json');
+
+const locationTypeList = [{ id: 1, name: 'leaves' }, { id: 2, name: 'stem' }, { id: 3, name: 'fruits' }, { id: 4, name: 'root' }]
 class CropDialog extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
         super(dialogId);
@@ -29,12 +30,12 @@ class CropDialog extends ComponentDialog {
             this.promptForAttachmentStep.bind(this),
             this.promptForCropStep.bind(this),
             this.promptForDateStep.bind(this),
-            this.promptForSymptomLocationStep.bind(this),
+            this.promptForlocationTypeStep.bind(this),
             this.endCropDialog.bind(this)
         ]));
         this.addDialog(new AttachmentPrompt(ATTACHMENT_PROMPT));
         this.addDialog(new ChoicePrompt(SELECTION_PROMPT));
-        this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator,"he-il"));
+        this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator, "he-il"));
 
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
@@ -109,20 +110,20 @@ class CropDialog extends ComponentDialog {
         }
     }
 
-    async promptForSymptomLocationStep(step) {
+    async promptForlocationTypeStep(step) {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-        if (userDataCrop.plantingDate == undefined && step.result && step.result.length>0 ) {
+        if (userDataCrop.plantingDate == undefined && step.result && step.result.length > 0) {
             userDataCrop.plantingDate = step.result[0].value;
         }
 
-        if (userDataCrop.symptomLocation.length == 0) {
+        if (userDataCrop.locationTypes.length == 0) {
 
-            let list = symptomLocationList.map((crop) => {
+            let list = locationTypeList.map((crop) => {
                 return crop.name;
             });
 
             return await step.prompt(SELECTION_PROMPT, {
-                prompt: 'select symptomLocation:',
+                prompt: 'select locationType:',
                 retryPrompt: 'Please choose an option from the list.',
                 choices: list
             });
@@ -132,10 +133,10 @@ class CropDialog extends ComponentDialog {
     }
     async endCropDialog(step) {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
-        if (userDataCrop.symptomLocation.length == 0 && step.result) {
+        if (userDataCrop.locationTypes.length == 0 && step.result) {
             const text = step.result.value;
-            const symptomLocation = symptomLocationList.find(x => x.name == text);
-            userDataCrop.symptomLocation = symptomLocation;
+            const locationType = locationTypeList.find(x => x.name == text);
+            userDataCrop.locationTypes.push(locationType);
         }
 
         await step.context.sendActivity('Thank you for your time.');

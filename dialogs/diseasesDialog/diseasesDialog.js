@@ -1,5 +1,6 @@
 const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, DateTimePrompt } = require('botbuilder-dialogs');
 const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
+const _ = require('lodash');
 
 const { DiseasesData } = require('../../data/diseasesData');
 
@@ -19,7 +20,7 @@ class DiseasesDialog extends ComponentDialog {
         if (!UserDataCropAccessor) throw ('Missing parameter.  UserDataCropAccessor is required');
 
         console.log("constructor of DiseasesDialog");
-       
+
 
         this.addDialog(new WaterfallDialog(DISEASE_DIALOG, [
             this.initializeStateStep.bind(this),
@@ -40,18 +41,20 @@ class DiseasesDialog extends ComponentDialog {
         const answersData = await this.UserDataCropAccessor.get(step.context);
         answersData.diseasesData = new DiseasesData();
         //filter diseases and fill diseasesScoreData
-        //_initDiseaseDataByAnswers(answersData);
+        this._initDiseaseDataByAnswers(answersData);
 
         return await step.next();
     }
     async promptNextQuestion(step) {
+        const answersData = await this.UserDataCropAccessor.get(step.context);
+        console.log(answersData.diseasesData);
         //loop while question!=null
-       
+
         // orderDiseases();
         // const question = getNextQuestion();
         // //answer = sendactivity(question);
         // filterAndScoreByField(field, answer);
-        
+
         return await step.prompt(DATE_PROMPT, 'here you will see dynamic questions');
     }
 
@@ -72,62 +75,332 @@ class DiseasesDialog extends ComponentDialog {
     }
 
     _initDiseaseDataByAnswers(answersData) {
-        _initDataByPicture(picture);
-        _initDataByCrop(crop);
-        _initDataByLocation(crop, location, plantingDate);
-        _initDataBySymptomLocation(symptomLocation);
+        this._initDataByPicture(answersData.diseasesData, answersData.picture);
+        this._initDataByCrop(answersData.diseasesData, answersData.crop);
+        this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
+        this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);
     }
 
-    _initDataByPicture(picture) {
-        //Priority + score
+    _initDataByPicture(diseasesData, picture) {
+        //TODO: to call api that returns external piority
+        let answerPicture = [{ id: 1, score: 0.1 }, { id: 2, score: 0.9 }];
+        answerPicture = _.orderBy(answerPicture, 'score', 'desc');
+        diseasesData.answerPicture = answerPicture;
     }
 
-    _initDataByCrop(crop) {
+    _initDataByCrop(diseasesData, crop) {
         //filter+score diseases by crop 
+        //now we don't have any filter by crop..
     }
 
     /**_initDataByLocation */
-    _initDataByLocation(crop, location, plantingDate) {
-        const temperatureList = _calculateTemperature(crop, location, plantingDate);
-        const gdd = _calculteGDD(crop, location, plantingDate);
-        const growStage = _calculateGrowStageByGDD(crop, plantingDate, gdd);
+    _initDataByLocation(diseasesData, crop, location, plantingDate) {
+        const tempList = this._calculateTemperature(crop, location, plantingDate);
+        const GDD = this._calculteGDD(crop, tempList.temperature);
+        const growthStage = this._calculateGrowthStageByGDD(crop, GDD);
 
         //filter+ score diseases
-        _filterByTemperatureList(temperatureList);
-        _filterByGrowStage(growStage);
-        _filterByRegion(location);
-    }
-
-    _calculteGDD(crop, location, plantingDate) {
-        //weazer aware location, crop, plantingDate
-        //returns gdd
-    }
-
-    _calculateGrowStageByGDD(crop, plantingDate, gdd) {
-        //return object of growstage : small, old..
+        this._filterByTemperatureList(diseasesData, tempList);
+        this._filterByGrowthStage(diseasesData, growthStage);
+        this._filterByRegion(diseasesData, location);
     }
 
     _calculateTemperature(crop, location, plantingDate) {
         //weazer get temperature + humidity of last two weeks
         //returns temperature + humidity list
+        const temperatureList = [{
+            "date": "01/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "02/01/2018",
+            "min": "21",
+            "max": "29"
+        }, {
+            "date": "03/01/2018",
+            "min": "17",
+            "max": "18"
+        }, {
+            "date": "04/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "05/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "06/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "07/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "08/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "09/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "10/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "11/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "12/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "13/01/2018",
+            "min": "24",
+            "max": "29"
+        }, {
+            "date": "14/01/2018",
+            "min": "24",
+            "max": "29"
+        }];
+
+        const humidityList = [{
+            "date": "01/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "02/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "03/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "04/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "05/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "06/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "07/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "08/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "09/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "10/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "11/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "12/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "13/01/2018",
+            "min": "90",
+            "max": "99"
+        }, {
+            "date": "14/01/2018",
+            "min": "90",
+            "max": "99"
+        }];
+
+        return { temperature: temperatureList, humidity: humidityList };
     }
 
-    _filterByTemperatureList(temperatureList) {
+    _calculteGDD(crop, temperatureList) {
+        const minimumTemperatureByCrop = crop.minimumTemperatureForGdd;
+        const GDD = _.reduce(temperatureList, (sum, temperature) => {
+            if (!sum) sum = 0;
+            return sum + (parseInt(temperature.min) + parseInt(temperature.max)) / 2 - minimumTemperatureByCrop;
+        });
+        return GDD;
+    }
+
+    _calculateGrowthStageByGDD(crop, GDD) {
+        //return object of growstage : small, old..
+        for (let i = 0; i < crop.growthStages.length; i++) {
+            const isLastGrowthStage = i + 1 == crop.growthStages.length;
+            if (isLastGrowthStage)
+                return crop.growthStages[i];
+
+            const currentMinGDD = crop.growthStages[i].minGDD;
+            const nextMinGDD = crop.growthStages[i + 1].minGDD;
+            if (currentMinGDD < GDD && GDD < nextMinGDD)
+                return crop.growthStages[i];
+        }
+    }
+
+
+    _filterByTemperatureList(diseasesData, temperatureList) {
         //temperature, humidity,
+        const diseases = [], diseasesScoreData = [];
+        _.forEach(diseasesData.diseases, (disease, index) => {
+            const resultTemperature = this._calculateScoreForTemp(disease.temperature, temperatureList.temperature);
+            if (resultTemperature.isFilterOut) return;
+            const resultHumidity = this._calculateScoreForTemp(disease.humidity, temperatureList.humidity);
+            if (resultHumidity.isFilterOut) return;
+
+            const currentDiseaseScoreDate = diseasesData.diseasesScoreData[index];
+            currentDiseaseScoreDate.fields.push({
+                name: "temperature",
+                score: resultTemperature.score
+            });
+            currentDiseaseScoreDate.fields.push({
+                name: "humidity",
+                score: resultHumidity.score
+            });
+
+            diseases.push(disease);
+            diseasesScoreData.push(currentDiseaseScoreDate);
+        });
+
+        diseasesData.diseases = diseases;
+        diseasesData.diseasesScoreData = diseasesScoreData;
     }
 
-    _filterByGrowStage(temperatureList) {
+    _calculateScoreForTemp(diseaseTemperature, list) {
+        let countIn = 0, countInStandardDeviation = 0, countOut = 0;
+        let sumAvg = 0;
+        const diseaseMin = parseInt(diseaseTemperature.min);
+        const diseaseMax = parseInt(diseaseTemperature.max);
+        if (!diseaseMin && !diseaseMax) {
+            return {
+                scoreTemperature: 1,
+                isFilterOut: false
+            }
+        }
+        const standardDeviationMin = parseInt(diseaseTemperature.standardDeviationMin);
+        const standardDeviationMax = parseInt(diseaseTemperature.standardDeviationMax);
+
+        _.forEach(list, (temperature) => {
+            const min = parseInt(temperature.min);
+            const max = parseInt(temperature.max);
+
+            sumAvg = sumAvg + ((min + max) / 2);
+
+            if ((!diseaseMin || min >= diseaseMin) && (!diseaseMax || max <= diseaseMax)) {
+                countIn++;
+            }
+            else if ((!standardDeviationMin || min >= standardDeviationMin) && (!standardDeviationMax || max <= standardDeviationMax)) {
+                countInStandardDeviation++;
+            } else {
+                countOut++;
+            }
+        });
+        const avg = sumAvg / list.length;
+        let scoreTemperature = (countIn + countInStandardDeviation * 0.5) / list.length;
+        return {
+            score: scoreTemperature,
+            isFilterOut: avg < standardDeviationMin || avg > standardDeviationMax || scoreTemperature < 0.3
+        }
+    }
+
+    _filterByGrowthStage(diseasesData, growthStage) {
         //GrowthStage 
+        const diseases = [], diseasesScoreData = [];
+        _.forEach(diseasesData.diseases, (disease, index) => {
+            const result = this._calculateScoreForGrowthStage(disease.growthStage, growthStage);
+            if (result.isFilterOut) return;
+
+            const currentDiseaseScoreDate = diseasesData.diseasesScoreData[index];
+            currentDiseaseScoreDate.fields.push({
+                name: "growthStage",
+                score: result.score
+            });
+            diseases.push(disease);
+            diseasesScoreData.push(currentDiseaseScoreDate);
+
+        });
+
+        diseasesData.diseases = diseases;
+        diseasesData.diseasesScoreData = diseasesScoreData;
     }
 
-    _filterByRegion(location) {
+    _calculateScoreForGrowthStage(diseaseListGrowthStage, cropGrowthStage) {
+        if (_.isEmpty(diseaseListGrowthStage) || diseaseListGrowthStage.length == 0) {
+            return {
+                score: 1,
+                isFilterOut: false
+            }
+        }
+
+        const currentGrowthStage = _.find(diseaseListGrowthStage, { "name": cropGrowthStage.name });
+        if (currentGrowthStage) {
+            return {
+                score: 1,
+                isFilterOut: false
+            }
+        }
+        return {
+            score: 0,
+            isFilterOut: true
+        }
+    }
+    _filterByRegion(diseasesData, location) {
         //Region
     }
     /**_initDataByLocation */
 
-    _initDataBySymptomLocation(symptomLocation) {
+    _initDataBylocationType(diseasesData, locationTypes) {
         //filter + score 
-        //symptomLocation
+        //locationType
+        const diseases = [], diseasesScoreData = [];
+        _.forEach(diseasesData.diseases, (disease, index) => {
+            const result = this._calculateScoreForLocationType(disease.locationTypes, locationTypes);
+            if (result.isFilterOut) return;
+
+            const currentDiseaseScoreDate = diseasesData.diseasesScoreData[index];
+            currentDiseaseScoreDate.fields = currentDiseaseScoreDate.fields.concat(result.fields);
+            diseases.push(disease);
+            diseasesScoreData.push(currentDiseaseScoreDate);
+        });
+
+        diseasesData.diseases = diseases;
+        diseasesData.diseasesScoreData = diseasesScoreData;
+
+    }
+
+    _calculateScoreForLocationType(list, selectedList) {
+        const currentList = _.intersectionBy(list, selectedList, "name");
+
+        if (currentList.length > 0) {
+            const fields = _.map(currentList, (current) => {
+                const name = "locationType:" + current.name
+                return {
+                    score: 1,
+                    name: name
+                }
+            });
+
+            return {
+                fields: fields,
+                isFilterOut: false
+            }
+        }
+        return {
+            fields: [],
+            isFilterOut: true
+        }
     }
 
 
