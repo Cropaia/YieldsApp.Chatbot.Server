@@ -21,6 +21,119 @@
                 "fromGDD": 1200,
                 "toGDD": 6500
             }
+        ],
+        "questions": [
+            {
+                "id": 1,
+                "text": "what is the growth stage?",
+                "type": 1,
+                "filter": false,
+                "score": null,
+                "conditions": [
+                    {
+                        "field": "gdd",
+                        "operation": ">=",
+                        "value": 200
+                    },
+                    {
+                        "operator": "and",
+                        "field": "gdd",
+                        "operation": "<=",
+                        "value": 1300
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "text": "Is the crop in the harvest stage?",
+                "type": 0,
+                "answers": {
+                    "false": {
+                        "answer": "true",
+                        "value": {
+                            "name": "Fruit set",
+                            "fromGDD": 900,
+                            "toGDD": 1200
+                        },
+                        "filter": false,
+                        "score": true,
+                        "score_number": [
+                            {
+                                "value": 1,
+                                "condition": [
+                                    {
+                                        "field": "gdd",
+                                        "operation": ">=",
+                                        "value": 900
+                                    },
+                                    {
+                                        "operator": "and",
+                                        "field": "gdd",
+                                        "operation": "<",
+                                        "value": 1200
+                                    }
+                                ]
+                            },
+                            {
+                                "value": 0.8,
+                                "condition": [
+                                    {
+                                        "field": "gdd",
+                                        "operation": ">",
+                                        "value": 1200
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    "true": {
+                        "answer": "false",
+                        "value": {
+                            "name": "Harvest",
+                            "fromGDD": 1200,
+                            "toGDD": 6500
+                        }, 
+                        "filter": false,
+                        "score": true,
+                        "score_number": [
+                            {
+                                "value": 1,
+                                "condition": [
+                                    {
+                                        "field": "gdd",
+                                        "operation": ">=",
+                                        "value": 1200
+                                    }
+                                ]
+                            },
+                            {
+                                "value": 0.7,
+                                "condition": [
+                                    {
+                                        "field": "gdd",
+                                        "operation": "<",
+                                        "value": 1200
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+               
+                "condition": [
+                    {
+                        "field": "gdd",
+                        "operation": ">=",
+                        "value": 200
+                    },
+                    {
+                        "operator": "and",
+                        "field": "gdd",
+                        "operation": "<=",
+                        "value": 1300
+                    }
+                ]
+            }
         ]
     }
 ]

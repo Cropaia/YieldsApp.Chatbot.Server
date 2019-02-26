@@ -9,8 +9,13 @@ const DISEASE_DIALOG = 'profileDialog';
 
 // Prompt IDs
 const ATTACHMENT_PROMPT = 'attachmentPrompt';
-const SELECTION_PROMPT = 'selectionPrompt';
+const NEXT_QUESTION_DIALOG = 'nextQuestionDialog';
 const DATE_PROMPT = 'datePrompt';
+
+const COMPANIES_SELECTED = 'companyselectedPrompt';
+const COMPANY_OPTIONS = ["Microsoft","Google"], DONE_OPTION="Done";
+const SELECTION_PROMPT = 'selectionPromp';
+
 class DiseasesDialog extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
         super(dialogId);
@@ -28,19 +33,20 @@ class DiseasesDialog extends ComponentDialog {
             this.endDiseaseDialog.bind(this),
         ]));
 
-        this.addDialog(new DateTimePrompt(DATE_PROMPT));
 
+        this.dialogs.add(new WaterfallDialog(NEXT_QUESTION_DIALOG)
+            .addStep(this.selectionStep.bind(this))
+            .addStep(this.loopStep.bind(this)));
 
-        // this.addDialog(new AttachmentPrompt(ATTACHMENT_PROMPT));
-        // this.addDialog(new ChoicePrompt(SELECTION_PROMPT));
-        // this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator));
+        this.dialogs
+            .add(new DateTimePrompt(DATE_PROMPT))
+            .add(new ChoicePrompt(SELECTION_PROMPT));
 
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
     async initializeStateStep(step) {
         const answersData = await this.UserDataCropAccessor.get(step.context);
         answersData.diseasesData = new DiseasesData();
-        //filter diseases and fill diseasesScoreData
         this._initDiseaseDataByAnswers(answersData);
 
         return await step.next();
@@ -48,17 +54,67 @@ class DiseasesDialog extends ComponentDialog {
     async promptNextQuestion(step) {
         const answersData = await this.UserDataCropAccessor.get(step.context);
         console.log(answersData.diseasesData);
-        //loop while question!=null
 
-        // orderDiseases();
-        // const question = getNextQuestion();
-        // //answer = sendactivity(question);
+        // getQuestionValue
         // filterAndScoreByField(field, answer);
 
-        return await step.prompt(DATE_PROMPT, 'here you will see dynamic questions');
+        // orderDiseases();
+        // const question = this._getNextQuestion();
+
+        return await step.beginDialog(NEXT_QUESTION_DIALOG);
     }
 
-    getNextQuestion() {
+    async selectionStep(step) {
+        // Continue using the same selection list, if any, from the previous iteration of this dialog.
+        const list = Array.isArray(step.options) ? step.options : [];
+        step.values[COMPANIES_SELECTED] = list;
+    
+        // Create a prompt message.
+        let message;
+        if (list.length === 0) {
+            message = 'Please choose a company to review, or `' + DONE_OPTION + '` to finish.';
+        } else {
+            message = `You have selected **${list[0]}**. You can review an addition company, ` +
+                'or choose `' + DONE_OPTION + '` to finish.';
+        }
+    
+        // Create the list of options to choose from.
+        const options = list.length > 0
+            ? COMPANY_OPTIONS.filter(function (item) { return item !== list[0] })
+            : COMPANY_OPTIONS.slice();
+        options.push(DONE_OPTION);
+    
+        // Prompt the user for a choice.
+        return await step.prompt(SELECTION_PROMPT, {
+            prompt: message,
+            retryPrompt: 'Please choose an option from the list.',
+            choices: options
+        });
+    }
+    
+    async loopStep(step) {
+        // Retrieve their selection list, the choice they made, and whether they chose to finish.
+        const list = step.values[COMPANIES_SELECTED];
+        const choice = step.result;
+        const done = choice.value === DONE_OPTION;
+    
+        if (!done) {
+            // If they chose a company, add it to the list.
+            list.push(choice.value);
+        }
+    
+        if (done || list.length > 1) {
+            // If they're done, exit and return their list.
+            return await step.endDialog(list);
+        } else {
+            // Otherwise, repeat this dialog, passing in the list from this iteration.
+            return await step.replaceDialog(NEXT_QUESTION_DIALOG, list);
+        }
+    }
+
+    _getNextQuestion() {
+
+        
 
     }
 
@@ -255,9 +311,21 @@ class DiseasesDialog extends ComponentDialog {
         //temperature, humidity,
         const diseases = [], diseasesScoreData = [];
         _.forEach(diseasesData.diseases, (disease, index) => {
-            const resultTemperature = this._calculateScoreForTemp(disease.temperature, temperatureList.temperature);
+            const temperature= {
+               min: disease.temperature_min,
+               max: disease.temperature_max,
+               standardDeviationMin: disease.temperature_standardDeviationMin,
+               standardDeviationMax: disease.temperature_standardDeviationMax,
+            }
+            const resultTemperature = this._calculateScoreForTemp(temperature, temperatureList.temperature);
             if (resultTemperature.isFilterOut) return;
-            const resultHumidity = this._calculateScoreForTemp(disease.humidity, temperatureList.humidity);
+            const humidity= {
+                min: disease.humidity_min,
+                max: disease.humidity_max,
+                standardDeviationMin: disease.humidity_standardDeviationMin,
+                standardDeviationMax: disease.humidity_standardDeviationMax,
+             }
+            const resultHumidity = this._calculateScoreForTemp(humidity, temperatureList.humidity);
             if (resultHumidity.isFilterOut) return;
 
             const currentDiseaseScoreDate = diseasesData.diseasesScoreData[index];

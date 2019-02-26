@@ -1,50 +1,64 @@
-[{
-    "id": 1,
-    "pathogenName" : "Alternaria",
-    "region" : ["us"],
-    "temperature" : {
-        "min":"24",
-        "max" : "29",
-        "standardDeviationMin": "19",
-        "standardDeviationMax": "35"
+[
+    {
+        "id": 1,
+        "pathogenName": "Alternaria",
+        "region": [
+            "us"
+        ],
+        "temperature_min": 24,
+        "temperature_max": 29,
+        "temperature_standardDeviationMin": 19,
+        "temperature_standardDeviationMax": 35,
+        "humidity_max": 90,
+        "humidity_min": null,
+        "humidity_standardDeviationMin": 88,
+        "humidity_standardDeviationMax": null,
+        "growthStage": [],
+        "location_leaves": true,
+        "location_stem": null,
+        "location_fruits": null,
+        "location_roots": false,
+        "leaves_symptomLocation": [
+            "upper",
+            "lower"
+        ],
+        "leaves_symptomType": [
+            "necrosis",
+            "chlorosis",
+            "lesions",
+            "spots"
+        ],
+        "leaves_sideLeaf": "upper",
+        "leaves_sypmtomLeafSurface": []
     },
-    "humidity":{
-        "min" : "90",
-        "max":"",
-        "standardDeviationMin" : "88",
-        "standardDeviationMax": ""
-    },
-    "growthStage":[],
-    "locationTypes": [
-        {
-            "name":  "leaves",
-            "symptomLocation": ["upper","lower"],
-            "symptomLocationSide": ["upper"],
-            "symptomLocationSurface": null,
-            "type": ["necrosis","chlorosis","lesions","spots"]
-        }
-    ]
-},{
-    "id": 2,
-    "pathogenName" : "Pytophthora infestans",
-    "region" : ["us"],
-    "temperature" : {
-        "min":"15",
-        "max" : "25"
-    },
-    "humidity":{
-        "min" : "95",
-        "max":""
-    },
-    "growthStage":{
-    },
-    "locationTypes": [
-        {
-            "name":  "leaves",
-            "symptomLocation": null,
-            "symptomLocationSide":null,
-            "symptomLocationSurface": null,
-            "type": ["blotches","lesions"]
-        }
-    ]
-}]
+    {
+        "id": 2,
+        "pathogenName": "Pytophthora infestans",
+        "region": [
+            "us"
+        ],
+        "temperature_min": 15,
+        "temperature_max": 25,
+        "temperature_standardDeviationMin": 19,
+        "temperature_standardDeviationMax": 35,
+        "humidity_max": 95,
+        "humidity_min": null,
+        "humidity_standardDeviationMin": 88,
+        "humidity_standardDeviationMax": null,
+        "growthStage": [],
+        "location_leaves": true,
+        "location_stem": null,
+        "location_fruits": null,
+        "location_roots": false,
+        "leaves_symptomLocation": [
+            "upper",
+            "lower"
+        ],
+        "leaves_symptomType": [
+            "blotches",
+            "lesions"
+        ],
+        "leaves_sideLeaf": "upper",
+        "leaves_sypmtomLeafSurface": []
+    }
+]
