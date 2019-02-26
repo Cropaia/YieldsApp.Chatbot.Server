@@ -1,0 +1,232 @@
+[
+    {
+        "name": "Id",
+        "label": "id",
+        "type": "string"
+    },
+    {
+        "name": "Pathogen Name",
+        "label": "pathogenName",
+        "type": "string"
+    },
+    {
+        "name": "Region",
+        "label": "region",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "all",
+            "us"
+        ],
+        "questions": [
+            {
+                "id": 1,
+                "text": "is your region is {{value}}",
+                "type": 0,
+                "answers": {
+                    "true": {
+                        "value": "{{value}}",
+                        "filter": false,
+                        "filter_condition": [],
+                        "score": true,
+                        "score_number": [
+                            {
+                                "value": 1,
+                                "condition": []
+                            }
+                        ]
+                    },
+                    "false": {
+                        "value": null, 
+                        "filter": true,
+                        "filter_condition": [],
+                        "score": true,
+                        "score_number": []
+                    }
+                },
+                "condition": {
+                    "field": "region",
+                    "operation": "!=",
+                    "value": "null"
+                }
+            }
+        ]
+    },
+    {
+        "name": "Temperature Min",
+        "label": "temperature_min",
+        "category": "temperature",
+        "type": "number"
+    },
+    {
+        "name": "Temperature Max",
+        "label": "temperature_max",
+        "category": "temperature",
+        "type": "number"
+    },
+    {
+        "name": "Temperature Deviation Min",
+        "label": "temperature_standardDeviationMin",
+        "category": "temperature",
+        "type": "number"
+    },
+    {
+        "name": "Temperature Deviation Max",
+        "label": "temperature_standardDeviationMax",
+        "category": "temperature",
+        "type": "number"
+    },
+    {
+        "name": "Humidity Max",
+        "label": "humidity_max",
+        "category": "humidity",
+        "type": "number"
+    },
+    {
+        "name": "Humidity Min",
+        "label": "humidity_min",
+        "category": "humidity",
+        "type": "number"
+    },
+    {
+        "name": "Humidity Deviation Min",
+        "label": "humidity_standardDeviationMin",
+        "category": "humidity",
+        "type": "number"
+    },
+    {
+        "name": "Humidity Deviation Max",
+        "label": "humidity_standardDeviationMax",
+        "category": "humidity",
+        "type": "number"
+    },
+    {
+        "name": "Growth Stage",
+        "label": "growthStage",
+        "category": "humidity",
+        "type": "list",
+        "multi": true,
+        "options": [
+        ]
+    },
+    {
+        "name": "GDD",
+        "label": "gdd",
+        "type": "number"
+    },
+    {
+        "name": "Location Leaves",
+        "label": "location_leaves",
+        "type": "boolean",
+        "category": "location_symptom_plant"
+    },
+    {
+        "name": "Location Stem",
+        "label": "location_stem",
+        "type": "boolean",
+        "category": "location_symptom_plant"
+    },
+    {
+        "name": "Location Fruits",
+        "label": "location_fruits",
+        "type": "boolean",
+        "category": "location_symptom_plant"
+    },
+    {
+        "name": "Location Roots",
+        "label": "location_roots",
+        "type": "boolean",
+        "category": "location_symptom_plant"
+    },
+    {
+        "name": "Symptom Location",
+        "label": "leaves_symptomLocation",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "any",
+            "lower",
+            "upper"
+        ]
+    },
+    {
+        "name": "Symptom Type",
+        "label": "leaves_symptomType",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "necrosis",
+            "chlorosis",
+            "lesions",
+            "spots",
+            "blotches"
+        ]
+    },
+    {
+        "name": "Side of leaf",
+        "label": "leaves_sideLeaf",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "upper",
+            "lower"
+        ]
+    },
+    {
+        "name": "Symptom location on leaf surface",
+        "label": "leaves_sypmtomLeafSurface",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": []
+    },
+    {
+        "name": "Symptom Shape",
+        "label": "leaves_sypmtomShape",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "Irregular",
+            "circular lesions"
+        ]
+    },
+    {
+        "name": "Symptom Color",
+        "label": "leaves_sypmtomColor",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "Brown",
+            "Pale green"
+        ]
+    },
+    {
+        "name": "Symptom Pattern",
+        "label": "leaves_sypmtomPattern",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "Concentric circles",
+            "Water-soaked",
+            "Light center"
+        ]
+    },
+    {
+        "name": "Symptom Pattern Color",
+        "label": "leaves_sypmtomPatternColor",
+        "category": "leaves",
+        "type": "options",
+        "multi": true,
+        "options": [
+            "Brown",
+            "Tan",
+            "Gray"
+        ]
+    }
+]
