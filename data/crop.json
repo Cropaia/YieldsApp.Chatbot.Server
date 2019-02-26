@@ -27,9 +27,28 @@
                 "id": 1,
                 "text": "what is the growth stage?",
                 "type": 1,
+                "options":[
+                    {
+                        "name": "Vegetative",
+                        "fromGDD": 30,
+                        "toGDD": 450       
+                    },{
+                        "name": "Flowering",
+                        "fromGDD": 450,
+                        "toGDD": 900
+                    },{
+                        "name": "Fruit set",
+                        "fromGDD": 900,
+                        "toGDD": 1200
+                    },{
+                        "name": "Harvest",
+                        "fromGDD": 1200,
+                        "toGDD": 6500
+                    }
+                ],
                 "filter": false,
                 "score": null,
-                "conditions": [
+                "condition": [
                     {
                         "field": "gdd",
                         "operation": ">=",

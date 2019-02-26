@@ -2,9 +2,7 @@
     {
         "id": 1,
         "pathogenName": "Alternaria",
-        "region": [
-            "us"
-        ],
+        "region": "us",
         "temperature_min": 24,
         "temperature_max": 29,
         "temperature_standardDeviationMin": 19,
@@ -34,9 +32,7 @@
     {
         "id": 2,
         "pathogenName": "Pytophthora infestans",
-        "region": [
-            "us"
-        ],
+        "region": "us",
         "temperature_min": 15,
         "temperature_max": 25,
         "temperature_standardDeviationMin": 19,

@@ -13,7 +13,7 @@
         "name": "Region",
         "label": "region",
         "type": "options",
-        "multi": true,
+        "multi": false,
         "options": [
             "all",
             "us"
@@ -21,7 +21,7 @@
         "questions": [
             {
                 "id": 1,
-                "text": "is your region is {{value}}",
+                "text": "Is your region is {{value}}?",
                 "type": 0,
                 "answers": {
                     "true": {
@@ -44,11 +44,11 @@
                         "score_number": []
                     }
                 },
-                "condition": {
+                "condition": [{
                     "field": "region",
                     "operation": "!=",
                     "value": "null"
-                }
+                }]
             }
         ]
     },
