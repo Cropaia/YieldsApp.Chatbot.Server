@@ -11,7 +11,10 @@ const CROP_DIALOG = 'profileDialog';
 
 // Prompt IDs
 const ATTACHMENT_PROMPT = 'attachmentPrompt';
-const SELECTION_PROMPT = 'selectionPrompt';
+const SELECTION_PROMPT = 'selectionPrompt', 
+    DONE_OPTION="Done", 
+    NEXT_QUESTION_DIALOG = 'nextQuestionDialog',
+    LOCATION_TYPE_SELECTION = 'locationTypes';
 const DATE_PROMPT = 'datePrompt';
 
 const cropList = require('./../../data/crop.json');
@@ -31,13 +34,17 @@ class CropDialog extends ComponentDialog {
             this.promptForAttachmentStep.bind(this),
             this.promptForCropStep.bind(this),
             this.promptForDateStep.bind(this),
-            this.promptForlocationTypeStep.bind(this),
+            this.promptNextQuestion.bind(this),
             this.endCropDialog.bind(this)
         ]));
+        this.dialogs.add(new WaterfallDialog(NEXT_QUESTION_DIALOG)
+        .addStep(this.selectionStep.bind(this))
+        .addStep(this.loopStep.bind(this)));
+
         this.addDialog(new AttachmentPrompt(ATTACHMENT_PROMPT));
         this.addDialog(new ChoicePrompt(SELECTION_PROMPT));
         this.addDialog(new DateTimePrompt(DATE_PROMPT, this.dateValidator, "he-il"));
-
+        
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
 
@@ -116,22 +123,75 @@ class CropDialog extends ComponentDialog {
         if (userDataCrop.plantingDate == undefined && step.result && step.result.length > 0) {
             userDataCrop.plantingDate = step.result[0].value;
         }
+        if (userDataCrop.locationTypes.length < 4) {
+            if (userDataCrop.locationTypes.length == 0) {
 
-        if (userDataCrop.locationTypes.length == 0) {
-
-            let list = locationTypeList.map((crop) => {
-                return crop.name;
-            });
-
+                let list = locationTypeList.map((crop) => {
+                    return crop.name;
+                });
+            }
             return await step.prompt(SELECTION_PROMPT, {
                 prompt: 'select locationType:',
                 retryPrompt: 'Please choose an option from the list.',
                 choices: list
             });
         } else {
-            return await step.next();
+          
+                return await step.next();
         }
     }
+    async selectionStep(step) {
+        // Continue using the same selection list, if any, from the previous iteration of this dialog.
+        const list = Array.isArray(step.options) ? step.options : [];
+        step.values[LOCATION_TYPE_SELECTION] = list;
+    
+        // Create a prompt message.
+        let message;
+        if (list.length === 0) {
+            message = 'Please choose a location to review, or `' + DONE_OPTION + '` to finish.';
+        } else {
+            message = `You have selected **${list[list.length-1]}**. You can review an addition location, ` +
+                'or choose `' + DONE_OPTION + '` to finish.';
+        }
+    
+        // Create the list of options to choose from.
+        const options = list.length > 0
+            ? locationTypeList.filter(function (item) { return item !== list[0] }).map(item => item.name)
+            : locationTypeList.slice().map(item => item.name);
+        options.push(DONE_OPTION);
+    
+        // Prompt the user for a choice.
+        return await step.prompt(SELECTION_PROMPT, {
+            prompt: message,
+            retryPrompt: 'Please choose an option from the list.',
+            choices: options
+        });
+    }
+    
+    async loopStep(step) {
+        // Retrieve their selection list, the choice they made, and whether they chose to finish.
+        const list = step.values[LOCATION_TYPE_SELECTION];
+        const choice = step.result;
+        const done = choice.value === DONE_OPTION;
+    
+        if (!done) {
+            // If they chose a company, add it to the list.
+            list.push(choice.value);
+        }
+    
+        if (done || list.length >= locationTypeList.length) {
+            const userDataCrop = await this.UserDataCropAccessor.get(step.context)
+            if (userDataCrop.locationTypes.length == 0 && list) {
+                userDataCrop.locationTypes = list;
+            }
+            // If they're done, exit and return their list.
+            return await step.endDialog(list);
+        } else {
+            // Otherwise, repeat this dialog, passing in the list from this iteration.
+            return await step.replaceDialog(NEXT_QUESTION_DIALOG, list);
+        }
+    }
+
     async endCropDialog(step) {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
         if (userDataCrop.locationTypes.length == 0 && step.result) {
@@ -211,6 +271,19 @@ class CropDialog extends ComponentDialog {
         await promptContext.context.sendActivity(
             "I'm sorry, we can't take date later than now.");
         return false;
+    }
+
+    async promptNextQuestion(step) {
+        const answersData = await this.UserDataCropAccessor.get(step.context);
+        console.log(answersData.diseasesData);
+
+        // getQuestionValue
+        // filterAndScoreByField(field, answer);
+
+        // orderDiseases();
+        // const question = this._getNextQuestion();
+
+        return await step.beginDialog(NEXT_QUESTION_DIALOG);
     }
 
 
