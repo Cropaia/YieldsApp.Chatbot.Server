@@ -1,6 +1,6 @@
 class AnswersData {
     constructor() {
-        this.picture = undefined;
+        this.pictures = [];
         this.crop = undefined;
         this.variety = undefined;
         this.plantingDate = undefined;
