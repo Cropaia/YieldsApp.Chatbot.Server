@@ -2,7 +2,8 @@ const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, DateTi
 
 const { AnswersData } = require('../../data/answersData');
 const path = require('path');
-const axios = require('axios');
+const request = require('request');
+const appRoot = require('app-root-path');
 const fs = require('fs');
 
 // Dialog IDs 
@@ -74,14 +75,14 @@ class CropDialog extends ComponentDialog {
         }
     }
     async promptForCropStep(step) {
-        console.log('promptForCropStep', step.result);
+        const userDataCrop = await this.UserDataCropAccessor.get(step.context);
+
         if (step.context.activity.attachments && step.context.activity.attachments.length > 0) {
             console.log('_handleIncomingAttachment');
 
-            //await this._handleIncomingAttachment(step.context);
+            await this._handleIncomingAttachment(step.context, userDataCrop);
         }
 
-        const userDataCrop = await this.UserDataCropAccessor.get(step.context);
         console.log('userDataCrop', userDataCrop);
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
@@ -204,8 +205,8 @@ class CropDialog extends ComponentDialog {
     }
 
 
-    async _handleIncomingAttachment(turnContext) {
-        const promises = turnContext.activity.attachments.map(this.downloadAttachmentAndWrite);
+    async _handleIncomingAttachment(turnContext,userDataCrop) {
+        const promises = turnContext.activity.attachments.map(this.downloadAttachmentAndWrite.bind(this));
         const successfulSaves = await Promise.all(promises);
 
         async function replyForReceivedAttachments(localAttachmentData) {
@@ -218,26 +219,18 @@ class CropDialog extends ComponentDialog {
         }
 
         const replyPromises = successfulSaves.map(replyForReceivedAttachments.bind(turnContext));
-        await Promise.all(replyPromises);
+        userDataCrop.pictures = await Promise.all(replyPromises);
     }
     /**
        * Downloads attachment to the disk.
        * @param {Object} attachment
        */
     async downloadAttachmentAndWrite(attachment) {
-        // Retrieve the attachment via the attachment's contentUrl.
-        const url = attachment.contentUrl;
-
         // Local file path for the bot to save the attachment.
-        const localFileName = path.join(__dirname, "attachments", attachment.name);
+        const localFileName = path.join(appRoot.path, "attachments", attachment.name);
 
         try {
-            const response = await axios.get(url);
-            fs.writeFile(localFileName, response.data, (fsError) => {
-                if (fsError) {
-                    throw fsError;
-                }
-            });
+            request(attachment.contentUrl).pipe(fs.createWriteStream(localFileName));
         } catch (error) {
             console.error(error);
             return undefined;
