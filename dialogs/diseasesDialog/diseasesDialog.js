@@ -1,6 +1,8 @@
 const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, DateTimePrompt } = require('botbuilder-dialogs');
 const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
 const _ = require('lodash');
+const fs = require('fs');
+const FormData = require('form-data');
 
 const { DiseasesData } = require('../../data/diseasesData');
 
@@ -13,7 +15,7 @@ const NEXT_QUESTION_DIALOG = 'nextQuestionDialog';
 const DATE_PROMPT = 'datePrompt';
 
 const COMPANIES_SELECTED = 'companyselectedPrompt';
-const COMPANY_OPTIONS = ["Microsoft","Google"], DONE_OPTION="Done";
+const COMPANY_OPTIONS = ["Microsoft", "Google"], DONE_OPTION = "Done";
 const SELECTION_PROMPT = 'selectionPromp';
 
 class DiseasesDialog extends ComponentDialog {
@@ -68,7 +70,7 @@ class DiseasesDialog extends ComponentDialog {
         // Continue using the same selection list, if any, from the previous iteration of this dialog.
         const list = Array.isArray(step.options) ? step.options : [];
         step.values[COMPANIES_SELECTED] = list;
-    
+
         // Create a prompt message.
         let message;
         if (list.length === 0) {
@@ -77,13 +79,13 @@ class DiseasesDialog extends ComponentDialog {
             message = `You have selected **${list[0]}**. You can review an addition company, ` +
                 'or choose `' + DONE_OPTION + '` to finish.';
         }
-    
+
         // Create the list of options to choose from.
         const options = list.length > 0
             ? COMPANY_OPTIONS.filter(function (item) { return item !== list[0] })
             : COMPANY_OPTIONS.slice();
         options.push(DONE_OPTION);
-    
+
         // Prompt the user for a choice.
         return await step.prompt(SELECTION_PROMPT, {
             prompt: message,
@@ -91,18 +93,18 @@ class DiseasesDialog extends ComponentDialog {
             choices: options
         });
     }
-    
+
     async loopStep(step) {
         // Retrieve their selection list, the choice they made, and whether they chose to finish.
         const list = step.values[COMPANIES_SELECTED];
         const choice = step.result;
         const done = choice.value === DONE_OPTION;
-    
+
         if (!done) {
             // If they chose a company, add it to the list.
             list.push(choice.value);
         }
-    
+
         if (done || list.length > 1) {
             // If they're done, exit and return their list.
             return await step.endDialog(list);
@@ -114,7 +116,7 @@ class DiseasesDialog extends ComponentDialog {
 
     _getNextQuestion() {
 
-        
+
 
     }
 
@@ -131,14 +133,28 @@ class DiseasesDialog extends ComponentDialog {
     }
 
     _initDiseaseDataByAnswers(answersData) {
-        this._initDataByPicture(answersData.diseasesData, answersData.picture);
+        this._initDataByPicture(answersData.diseasesData, answersData.pictures);
         this._initDataByCrop(answersData.diseasesData, answersData.crop);
         this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
         this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);
     }
 
-    _initDataByPicture(diseasesData, picture) {
-        //TODO: to call api that returns external piority
+    _initDataByPicture(diseasesData, pictures) {
+        if (pictures.length == 0) return;
+        //TODO: to change image to list of images and looping
+        let image = fs.createReadStream(pictures[0].localPath);
+        var form = new FormData();
+        form.append('image', image);
+        form.submit(process.env.PictureAI_Path, function (err, res) {
+            // res – response object (http.IncomingMessage)  //
+            res.resume();
+            res.on('data', function (chunk) {
+                console.log(res.statusCode);
+                const aiProbaList = JSON.parse(chunk);
+                //TODO: to order by the specific functions
+            });
+
+        });
         let answerPicture = [{ id: 1, score: 0.1 }, { id: 2, score: 0.9 }];
         answerPicture = _.orderBy(answerPicture, 'score', 'desc');
         diseasesData.answerPicture = answerPicture;
@@ -311,20 +327,20 @@ class DiseasesDialog extends ComponentDialog {
         //temperature, humidity,
         const diseases = [], diseasesScoreData = [];
         _.forEach(diseasesData.diseases, (disease, index) => {
-            const temperature= {
-               min: disease.temperature_min,
-               max: disease.temperature_max,
-               standardDeviationMin: disease.temperature_standardDeviationMin,
-               standardDeviationMax: disease.temperature_standardDeviationMax,
+            const temperature = {
+                min: disease.temperature_min,
+                max: disease.temperature_max,
+                standardDeviationMin: disease.temperature_standardDeviationMin,
+                standardDeviationMax: disease.temperature_standardDeviationMax,
             }
             const resultTemperature = this._calculateScoreForTemp(temperature, temperatureList.temperature);
             if (resultTemperature.isFilterOut) return;
-            const humidity= {
+            const humidity = {
                 min: disease.humidity_min,
                 max: disease.humidity_max,
                 standardDeviationMin: disease.humidity_standardDeviationMin,
                 standardDeviationMax: disease.humidity_standardDeviationMax,
-             }
+            }
             const resultHumidity = this._calculateScoreForTemp(humidity, temperatureList.humidity);
             if (resultHumidity.isFilterOut) return;
 

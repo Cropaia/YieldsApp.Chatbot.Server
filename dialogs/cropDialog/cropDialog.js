@@ -211,15 +211,14 @@ class CropDialog extends ComponentDialog {
 
         async function replyForReceivedAttachments(localAttachmentData) {
             if (localAttachmentData) {
-                await this.sendActivity(`Attachment "${localAttachmentData.fileName}" ` +
-                    `has been received and saved to "${localAttachmentData.localPath}".`);
+                userDataCrop.pictures.push(localAttachmentData);
             } else {
                 await this.sendActivity('Attachment was not successfully saved to disk.');
             }
         }
 
         const replyPromises = successfulSaves.map(replyForReceivedAttachments.bind(turnContext));
-        userDataCrop.pictures = await Promise.all(replyPromises);
+        await Promise.all(replyPromises);
     }
     /**
        * Downloads attachment to the disk.
