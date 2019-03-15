@@ -3,6 +3,7 @@ const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
 const _ = require('lodash');
 const fs = require('fs');
 const FormData = require('form-data');
+const { getAwareNorms } = require('./aware-api');
 
 const { DiseasesData } = require('../../data/diseasesData');
 
@@ -28,7 +29,6 @@ class DiseasesDialog extends ComponentDialog {
 
         console.log("constructor of DiseasesDialog");
 
-
         this.addDialog(new WaterfallDialog(DISEASE_DIALOG, [
             this.initializeStateStep.bind(this),
             this.promptNextQuestion.bind(this),
@@ -49,7 +49,7 @@ class DiseasesDialog extends ComponentDialog {
     async initializeStateStep(step) {
         const answersData = await this.UserDataCropAccessor.get(step.context);
         answersData.diseasesData = new DiseasesData();
-        this._initDiseaseDataByAnswers(answersData);
+        await this._initDiseaseDataByAnswers(answersData);
 
         return await step.next();
     }
@@ -135,7 +135,7 @@ class DiseasesDialog extends ComponentDialog {
     _initDiseaseDataByAnswers(answersData) {
         this._initDataByPicture(answersData.diseasesData, answersData.pictures);
         this._initDataByCrop(answersData.diseasesData, answersData.crop);
-        this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
+        await this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
         this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);
     }
 
@@ -166,8 +166,8 @@ class DiseasesDialog extends ComponentDialog {
     }
 
     /**_initDataByLocation */
-    _initDataByLocation(diseasesData, crop, location, plantingDate) {
-        const tempList = this._calculateTemperature(crop, location, plantingDate);
+    async _initDataByLocation(diseasesData, crop, location, plantingDate) {
+        const tempList = await this._calculateTemperature(crop, location, plantingDate);
         const GDD = this._calculteGDD(crop, tempList.temperature);
         const growthStage = this._calculateGrowthStageByGDD(crop, GDD);
 
@@ -177,124 +177,14 @@ class DiseasesDialog extends ComponentDialog {
         this._filterByRegion(diseasesData, location);
     }
 
-    _calculateTemperature(crop, location, plantingDate) {
+    async _calculateTemperature(crop, location, plantingDate = new Date('01/01/2019')) {
         //weazer get temperature + humidity of last two weeks
         //returns temperature + humidity list
-        const temperatureList = [{
-            "date": "01/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "02/01/2018",
-            "min": "21",
-            "max": "29"
-        }, {
-            "date": "03/01/2018",
-            "min": "17",
-            "max": "18"
-        }, {
-            "date": "04/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "05/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "06/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "07/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "08/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "09/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "10/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "11/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "12/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "13/01/2018",
-            "min": "24",
-            "max": "29"
-        }, {
-            "date": "14/01/2018",
-            "min": "24",
-            "max": "29"
-        }];
+       
+      const list=  await getAwareNorms(location,plantingDate);
+        const temperatureList = list.temperature;
 
-        const humidityList = [{
-            "date": "01/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "02/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "03/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "04/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "05/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "06/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "07/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "08/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "09/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "10/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "11/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "12/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "13/01/2018",
-            "min": "90",
-            "max": "99"
-        }, {
-            "date": "14/01/2018",
-            "min": "90",
-            "max": "99"
-        }];
+        const humidityList = list.humidity;
 
         return { temperature: temperatureList, humidity: humidityList };
     }

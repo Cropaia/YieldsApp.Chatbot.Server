@@ -1,0 +1,7 @@
+token
+https://api.awhere.com/oauth/token
+
+send token in headers 
+create field with location
+get weather by field and dates range
+https://api.awhere.com/v2/weather/fields/field1/norms/02-25,03-03

@@ -4,7 +4,7 @@ class AnswersData {
         this.crop = undefined;
         this.variety = undefined;
         this.plantingDate = undefined;
-        this.location = { lat: 32.08688, lng: 34.8311477 };
+        this.location = { latitude: 32.08688, longitude: 34.8311477 };
         this.locationTypes = [];
         this.diseasesData = {};
     }
