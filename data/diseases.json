@@ -3,14 +3,14 @@
         "id": 1,
         "pathogenName": "Alternaria",
         "region": "us",
-        "temperature_min": 24,
+        "temperature_min": 9,
         "temperature_max": 29,
-        "temperature_standardDeviationMin": 19,
+        "temperature_standardDeviationMin": 7,
         "temperature_standardDeviationMax": 35,
-        "humidity_max": 90,
+        "humidity_max": 93,
         "humidity_min": null,
-        "humidity_standardDeviationMin": 88,
-        "humidity_standardDeviationMax": null,
+        "humidity_standardDeviationMax": 100,
+        "humidity_standardDeviationMin": null,
         "growthStage": [],
         "location_leaves": true,
         "location_stem": null,
@@ -27,20 +27,38 @@
             "spots"
         ],
         "leaves_sideLeaf": "upper",
-        "leaves_sypmtomLeafSurface": []
+        "leaves_sypmtomLeafSurface": [],
+        "policies": {
+            "questions_order": [
+                "region",
+                "leaves_symptomType",
+                "leaves_symptomLocation"
+            ],
+            "questions_groups": [
+                {
+                    "condition": [
+                        {
+                            "field": "leaves_symptomLocation",
+                            "operation": ">",
+                            "score": 0.6
+                        }
+                    ]
+                }
+            ]
+        }
     },
     {
         "id": 2,
         "pathogenName": "Pytophthora infestans",
         "region": "us",
-        "temperature_min": 15,
+        "temperature_min": 8,
         "temperature_max": 25,
-        "temperature_standardDeviationMin": 19,
+        "temperature_standardDeviationMin": 7,
         "temperature_standardDeviationMax": 35,
         "humidity_max": 95,
         "humidity_min": null,
-        "humidity_standardDeviationMin": 88,
-        "humidity_standardDeviationMax": null,
+        "humidity_standardDeviationMax": 100,
+        "humidity_standardDeviationMin": null,
         "growthStage": [],
         "location_leaves": true,
         "location_stem": null,

@@ -1,4 +1,4 @@
-const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, DateTimePrompt } = require('botbuilder-dialogs');
+const { ComponentDialog, WaterfallDialog, AttachmentPrompt, ChoicePrompt, ConfirmPrompt } = require('botbuilder-dialogs');
 const { ActionTypes, ActivityTypes, CardFactory } = require('botbuilder');
 const _ = require('lodash');
 const fs = require('fs');
@@ -13,10 +13,8 @@ const DISEASE_DIALOG = 'profileDialog';
 // Prompt IDs
 const ATTACHMENT_PROMPT = 'attachmentPrompt';
 const NEXT_QUESTION_DIALOG = 'nextQuestionDialog';
-const DATE_PROMPT = 'datePrompt';
+const YESNO_PROMPT = 'yesnoPrompt';
 
-const COMPANIES_SELECTED = 'companyselectedPrompt';
-const COMPANY_OPTIONS = ["Microsoft", "Google"], DONE_OPTION = "Done";
 const SELECTION_PROMPT = 'selectionPromp';
 
 class DiseasesDialog extends ComponentDialog {
@@ -41,8 +39,8 @@ class DiseasesDialog extends ComponentDialog {
             .addStep(this.loopStep.bind(this)));
 
         this.dialogs
-            .add(new DateTimePrompt(DATE_PROMPT))
-            .add(new ChoicePrompt(SELECTION_PROMPT));
+            .add(new ChoicePrompt(SELECTION_PROMPT))
+            .add(new ConfirmPrompt(YESNO_PROMPT))
 
         this.UserDataCropAccessor = UserDataCropAccessor;
     }
@@ -54,72 +52,81 @@ class DiseasesDialog extends ComponentDialog {
         return await step.next();
     }
     async promptNextQuestion(step) {
-        const answersData = await this.UserDataCropAccessor.get(step.context);
-        console.log(answersData.diseasesData);
-
-        // getQuestionValue
-        // filterAndScoreByField(field, answer);
-
-        // orderDiseases();
-        // const question = this._getNextQuestion();
-
         return await step.beginDialog(NEXT_QUESTION_DIALOG);
     }
 
     async selectionStep(step) {
-        // Continue using the same selection list, if any, from the previous iteration of this dialog.
-        const list = Array.isArray(step.options) ? step.options : [];
-        step.values[COMPANIES_SELECTED] = list;
+        const answersData = await this.UserDataCropAccessor.get(step.context);
 
-        // Create a prompt message.
-        let message;
-        if (list.length === 0) {
-            message = 'Please choose a company to review, or `' + DONE_OPTION + '` to finish.';
-        } else {
-            message = `You have selected **${list[0]}**. You can review an addition company, ` +
-                'or choose `' + DONE_OPTION + '` to finish.';
+        this.orderDiseases(answersData);
+        const countDiseases = answersData.diseasesData.diseases.length;
+        if (countDiseases == 1) {
+            const disease = answersData.diseasesData.diseases[0];
+            await step.context.sendActivity(`Your Disease is ${disease.pathogenName}`);
+            return await step.endDialog()
+        } else if (countDiseases == 0) {
+            await step.context.sendActivity(`Didn't found your disease`);
+            return await step.endDialog()
         }
 
-        // Create the list of options to choose from.
-        const options = list.length > 0
-            ? COMPANY_OPTIONS.filter(function (item) { return item !== list[0] })
-            : COMPANY_OPTIONS.slice();
-        options.push(DONE_OPTION);
 
-        // Prompt the user for a choice.
-        return await step.prompt(SELECTION_PROMPT, {
-            prompt: message,
-            retryPrompt: 'Please choose an option from the list.',
-            choices: options
+        const disease = answersData.diseasesData.diseases[0];
+
+        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease);
+        if (nextQuestion == null) {
+            await step.context.sendActivity(`Your Disease is ${disease.pathogenName}`);
+            return await step.endDialog()
+        }
+        answersData.question = nextQuestion.question;
+        const message = this._getMessageQuestion(disease, nextQuestion);
+
+        return await step.prompt(YESNO_PROMPT, {
+            prompt: message
         });
     }
 
     async loopStep(step) {
-        // Retrieve their selection list, the choice they made, and whether they chose to finish.
-        const list = step.values[COMPANIES_SELECTED];
-        const choice = step.result;
-        const done = choice.value === DONE_OPTION;
-
-        if (!done) {
-            // If they chose a company, add it to the list.
-            list.push(choice.value);
-        }
-
-        if (done || list.length > 1) {
-            // If they're done, exit and return their list.
-            return await step.endDialog(list);
-        } else {
-            // Otherwise, repeat this dialog, passing in the list from this iteration.
-            return await step.replaceDialog(NEXT_QUESTION_DIALOG, list);
-        }
-    }
-
-    _getNextQuestion() {
-
-
+        const answersData = await this.UserDataCropAccessor.get(step.context);
+        const question = answersData.question;
+        //TODO: to calculate the value        
+        this._calculateQuestionValue('')
+        return await step.replaceDialog(NEXT_QUESTION_DIALOG);
 
     }
 
+    _getNextQuestion(diseasesMetaData, disease) {
+        let fieldQuestion = null;;
+        do {
+            const fieldName = disease.policies.questions_order.shift();
+            fieldQuestion = _.find(diseasesMetaData, { label: fieldName });
+            let question = null;
+            while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0 && !question)) {
+                question = fieldQuestion.questions.shift();
+                if (!this._checkCondition(disease, question.condition))
+                    question = null;
+            }
+            if (question) {
+                return {
+                    question: question,
+                    fieldQuestion: fieldQuestion
+                }
+            }
+        } while (disease.policies.questions_order.length > 0)
+        return null;
+    }
+
+    _getMessageQuestion(disease, question) {
+        //TODO: to change it
+        return question.question.text;
+    }
+    _checkCondition(disease, condition) {
+        //TODO: to fill it 
+        return true;
+    }
+
+    _calculateQuestionValue(message) {
+
+    }
     filterAndScoreByField(field, value) {
 
     }
@@ -132,7 +139,7 @@ class DiseasesDialog extends ComponentDialog {
         return await step.endDialog();
     }
 
-    _initDiseaseDataByAnswers(answersData) {
+    async _initDiseaseDataByAnswers(answersData) {
         this._initDataByPicture(answersData.diseasesData, answersData.pictures);
         this._initDataByCrop(answersData.diseasesData, answersData.crop);
         await this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
@@ -180,8 +187,8 @@ class DiseasesDialog extends ComponentDialog {
     async _calculateTemperature(crop, location, plantingDate = new Date('01/01/2019')) {
         //weazer get temperature + humidity of last two weeks
         //returns temperature + humidity list
-       
-      const list=  await getAwareNorms(location,plantingDate);
+
+        const list = await getAwareNorms(location, plantingDate);
         const temperatureList = list.temperature;
 
         const humidityList = list.humidity;
@@ -340,7 +347,7 @@ class DiseasesDialog extends ComponentDialog {
         //locationType
         const diseases = [], diseasesScoreData = [];
         _.forEach(diseasesData.diseases, (disease, index) => {
-            const result = this._calculateScoreForLocationType(disease.locationTypes, locationTypes);
+            const result = this._calculateScoreForLocationType(disease, locationTypes);
             if (result.isFilterOut) return;
 
             const currentDiseaseScoreDate = diseasesData.diseasesScoreData[index];
@@ -354,12 +361,15 @@ class DiseasesDialog extends ComponentDialog {
 
     }
 
-    _calculateScoreForLocationType(list, selectedList) {
-        const currentList = _.intersectionBy(list, selectedList, "name");
+    _calculateScoreForLocationType(disease, locations) {
+        const currentList = _.filter(locations, (location) => {
+            const result = _.get(disease, 'location_' + location);
+            return result;
+        });
 
         if (currentList.length > 0) {
             const fields = _.map(currentList, (current) => {
-                const name = "locationType:" + current.name
+                const name = "location_" + current
                 return {
                     score: 1,
                     name: name

@@ -26,7 +26,7 @@ class Bot {
 
         this.conversationState = conversationState;
         this.userState = userState;
-        this.dialogIndex = 0;       
+        this.dialogIndex = 0;
     }
 
     async onTurn(turnContext) {
@@ -38,29 +38,31 @@ class Bot {
             dialogResult = await dc.continueDialog();
 
             //}
+            if (dialogResult) {
+                if (!dc.context.responded) {
 
-            if (!dc.context.responded) {
-
-                switch (dialogResult.status) {
-                    case DialogTurnStatus.empty:
+                    switch (dialogResult.status) {
+                        case DialogTurnStatus.empty:
+                            await this.beginNextDialog(dc);
+                            break;
+                        case DialogTurnStatus.waiting:
+                            break;
+                        case DialogTurnStatus.complete:
+                            // console.log("5 beginDialog starting (complete)");
+                            await this.beginNextDialog(dc);
+                            // console.log("5  end of beginDialog (complete)");
+                            break;
+                        default:
+                            await dc.cancelAllDialogs();
+                            break;
+                    }
+                } else {
+                    if (dialogResult.status == DialogTurnStatus.complete) {
                         await this.beginNextDialog(dc);
-                        break;
-                    case DialogTurnStatus.waiting:
-                        break;
-                    case DialogTurnStatus.complete:
-                        // console.log("5 beginDialog starting (complete)");
-                        // await this.beginNextDialog(dc);
-                        // console.log("5  end of beginDialog (complete)");
-                        break;
-                    default:
-                        await dc.cancelAllDialogs();
-                        break;
-                }
-            } else {
-                if (dialogResult.status == DialogTurnStatus.complete) {
-                    await this.beginNextDialog(dc);
+                    }
                 }
             }
+
 
         } else if (turnContext.activity.type === ActivityTypes.ConversationUpdate &&
             turnContext.activity.recipient.id === turnContext.activity.membersAdded[0].id && turnContext.activity.recipient.name === turnContext.activity.membersAdded[0].name) {

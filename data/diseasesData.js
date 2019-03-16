@@ -1,21 +1,27 @@
 
 const diseases = require('./diseases.json')
+//const diseasesMetaData = require('./diseases_metadata.json')
 const _ = require('lodash');
 
 class DiseasesData {
     constructor() {
         this.diseases = this._getDiseases();
-        this.diseasesScoreData = this._getdiseasesScoreData();
+        this.diseasesScoreData = this._getDiseasesScoreData();
+        this.diseasesMetaData = this._getDiseasesMetaData();
     }
 
     _getDiseases() {
-        return diseases;
+        return require('./diseases.json');
     }
 
-    _getdiseasesScoreData() {
+    _getDiseasesScoreData() {
         return _.map(this.diseases, (disease) => {
             return { id: disease.id, fields: [] }
         });
+    }
+
+    _getDiseasesMetaData(){
+        return require('./diseases_metadata.json');
     }
 };
 

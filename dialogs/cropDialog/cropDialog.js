@@ -200,7 +200,6 @@ class CropDialog extends ComponentDialog {
             userDataCrop.locationTypes.push(locationType);
         }
 
-        await step.context.sendActivity('Thank you for your time.');
         return await step.endDialog();
     }
 
