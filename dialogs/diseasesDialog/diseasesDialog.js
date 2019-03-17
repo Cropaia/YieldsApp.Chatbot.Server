@@ -62,7 +62,9 @@ class DiseasesDialog extends ComponentDialog {
         const countDiseases = answersData.diseasesData.diseases.length;
         if (countDiseases == 1) {
             const disease = answersData.diseasesData.diseases[0];
-            await step.context.sendActivity(`Your Disease is ${disease.pathogenName}`);
+            const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
+            const score = this._calculateFinalScore(diseaseScore)
+            await step.context.sendActivity(`Your Disease is ${disease.pathogenName} with score of ${score}`);
             return await step.endDialog()
         } else if (countDiseases == 0) {
             await step.context.sendActivity(`Didn't found your disease`);
@@ -74,12 +76,14 @@ class DiseasesDialog extends ComponentDialog {
 
         const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease);
         if (nextQuestion == null) {
-            await step.context.sendActivity(`Your Disease is ${disease.pathogenName}`);
+            const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
+            const score = this._calculateFinalScore(diseaseScore)
+            await step.context.sendActivity(`Your Disease is ${disease.pathogenName} with score of ${score}`);
             return await step.endDialog()
         }
         answersData.question = nextQuestion.question;
         const message = this._getMessageQuestion(disease, nextQuestion);
-
+        //TODO: options or yesNo
         return await step.prompt(YESNO_PROMPT, {
             prompt: message
         });
@@ -89,11 +93,16 @@ class DiseasesDialog extends ComponentDialog {
         const answersData = await this.UserDataCropAccessor.get(step.context);
         const question = answersData.question;
         //TODO: to calculate the value        
-        this._calculateQuestionValue('')
+        this._calculateQuestionField(answersData,step.result);
+        
+
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
 
     }
-
+    _calculateFinalScore(diseaseScore) {
+        //TODO: to return patogen Class
+        return 0.99 * 100;
+    }
     _getNextQuestion(diseasesMetaData, disease) {
         let fieldQuestion = null;;
         do {
@@ -124,15 +133,17 @@ class DiseasesDialog extends ComponentDialog {
         return true;
     }
 
-    _calculateQuestionValue(message) {
-
+    _calculateQuestionField(answersData, value) {
+        //if is filter - filter question by field
+        //if is score - score field
     }
     filterAndScoreByField(field, value) {
 
     }
 
     orderDiseases() {
-
+        //diseases
+        //diseasesScoreData
     }
 
     async endDiseaseDialog(step) {
@@ -157,14 +168,23 @@ class DiseasesDialog extends ComponentDialog {
             res.resume();
             res.on('data', function (chunk) {
                 console.log(res.statusCode);
-                const aiProbaList = JSON.parse(chunk);
+                const result = JSON.parse(chunk);
+                let answerPicture = [];
+                if (result && result.classes) {
+                    result.classes.forEach((clazz, index) => {
+                        answerPicture.push({ pathogenClass: clazz, score: result.proba[index] })
+                    });
+                }
+                answerPicture = _.orderBy(answerPicture, 'score', 'desc');
+                //TODO: to add this diseasesScoreData in field named pathogenClass
+                diseasesData.answerPicture = answerPicture;
+
+
                 //TODO: to order by the specific functions
             });
 
         });
-        let answerPicture = [{ id: 1, score: 0.1 }, { id: 2, score: 0.9 }];
-        answerPicture = _.orderBy(answerPicture, 'score', 'desc');
-        diseasesData.answerPicture = answerPicture;
+
     }
 
     _initDataByCrop(diseasesData, crop) {

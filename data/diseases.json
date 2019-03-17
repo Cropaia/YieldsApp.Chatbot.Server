@@ -1,7 +1,8 @@
 [
     {
         "id": 1,
-        "pathogenName": "Alternaria",
+        "pathogenClass" : "early_blight",
+        "pathogenName": "Early Blight",
         "region": "us",
         "temperature_min": 9,
         "temperature_max": 29,
@@ -49,7 +50,8 @@
     },
     {
         "id": 2,
-        "pathogenName": "Pytophthora infestans",
+        "pathogenClass" : "bacterial_spot",
+        "pathogenName": "Bacterial Spot",
         "region": "us",
         "temperature_min": 8,
         "temperature_max": 25,
