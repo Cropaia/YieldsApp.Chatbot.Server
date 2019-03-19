@@ -73,8 +73,8 @@ class DiseasesDialog extends ComponentDialog {
 
 
         const disease = answersData.diseasesData.diseases[0];
-
-        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease);
+        const crop = answersData.crop;
+        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, crop);
         if (nextQuestion == null) {
             const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
             const score = this._calculateFinalScore(diseaseScore)
@@ -93,37 +93,62 @@ class DiseasesDialog extends ComponentDialog {
         const answersData = await this.UserDataCropAccessor.get(step.context);
         const question = answersData.question;
         //TODO: to calculate the value        
-        this._calculateQuestionField(answersData,step.result);
-        
+        this._calculateQuestionField(answersData, step.result);
+
 
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
 
     }
     _calculateFinalScore(diseaseScore) {
         //TODO: to return patogen Class
-        return 0.99 * 100;
+        return 0.8 * 100;
     }
-    _getNextQuestion(diseasesMetaData, disease) {
+    _getNextQuestion(diseasesMetaData, disease, crop) {
         let fieldQuestion = null;;
-        do {
-            const fieldName = disease.policies.questions_order.shift();
-            fieldQuestion = _.find(diseasesMetaData, { label: fieldName });
+        while (disease.policies.questions_order.length > 0) {
+            const fieldName = disease.policies.questions_order[0];
+            fieldQuestion = this._getNexFieldQuestionByLevel(fieldName, disease, crop, diseasesMetaData);
             let question = null;
-            while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0 && !question)) {
+            while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
-                if (!this._checkCondition(disease, question.condition))
-                    question = null;
-            }
-            if (question) {
-                return {
-                    question: question,
-                    fieldQuestion: fieldQuestion
+                if (this._checkCondition(disease, question.condition)) {
+                    if (fieldQuestion.questions.length == 0) {
+                        //move to next field's question
+                        disease.policies.questions_order.shift();
+                    }
+                    return {
+                        question: question,
+                        fieldQuestion: fieldQuestion
+                    }
                 }
             }
-        } while (disease.policies.questions_order.length > 0)
+            disease.policies.questions_order.shift();
+        }
+
+
         return null;
     }
 
+    _getNexFieldQuestionByLevel(fieldName, disease, crop, diseasesMetaData) {
+        //disease
+        let metaData = disease.metaData;
+        if (metaData) {
+            const fieldQuestion = _.find(metaData, { label: fieldName });
+            if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
+                return fieldQuestion;
+        }
+
+        //crop
+        metaData = crop.metaData;
+        if (metaData) {
+            const fieldQuestion = _.find(metaData, { label: fieldName });
+            if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
+                return fieldQuestion;
+        }
+
+        //diseaseMetaData
+        return _.find(diseasesMetaData, { label: fieldName });
+    }
     _getMessageQuestion(disease, question) {
         //TODO: to change it
         return question.question.text;

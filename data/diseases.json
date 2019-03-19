@@ -32,6 +32,7 @@
         "policies": {
             "questions_order": [
                 "region",
+                "gdd",
                 "leaves_symptomType",
                 "leaves_symptomLocation"
             ],
@@ -46,7 +47,8 @@
                     ]
                 }
             ]
-        }
+        },
+        "metaData":[]
     },
     {
         "id": 2,
@@ -75,6 +77,7 @@
             "lesions"
         ],
         "leaves_sideLeaf": "upper",
-        "leaves_sypmtomLeafSurface": []
+        "leaves_sypmtomLeafSurface": [],
+        "metadata":[]
     }
 ]
