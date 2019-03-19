@@ -37,18 +37,25 @@
                         ]
                     },
                     "false": {
-                        "value": null, 
+                        "value": null,
                         "filter": true,
                         "filter_condition": [],
                         "score": true,
-                        "score_number": []
+                        "score_number": [
+                            {
+                                "value": 0.5,
+                                "condition": []
+                            }
+                        ]
                     }
                 },
-                "condition": [{
-                    "field": "region",
-                    "operation": "!=",
-                    "value": "null"
-                }]
+                "condition": [
+                    {
+                        "field": "region",
+                        "operation": "!=",
+                        "value": "null"
+                    }
+                ]
             }
         ]
     },
@@ -106,8 +113,7 @@
         "category": "humidity",
         "type": "list",
         "multi": true,
-        "options": [
-        ]
+        "options": []
     },
     {
         "name": "GDD",

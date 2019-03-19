@@ -85,21 +85,13 @@ class DiseasesDialog extends ComponentDialog {
             await step.context.sendActivity(`Your Disease is ${disease.pathogenName} with score of ${score}`);
             return await step.endDialog()
         }
-        answersData.question = nextQuestion.question;
+        answersData.nextQuestion = nextQuestion;
+        answersData.disease = disease;
+        answersData.diseaseIndex = 0;
 
         return await this._prompQuestion(step, disease, nextQuestion);
     }
 
-    async loopStep(step) {
-        const answersData = await this.UserDataCropAccessor.get(step.context);
-        const question = answersData.question;
-        //TODO: to calculate the value        
-        this._calculateQuestionField(answersData, step.result);
-
-
-        return await step.replaceDialog(NEXT_QUESTION_DIALOG);
-
-    }
     async _prompQuestion(step, disease, nextQuestion) {
         const message = this._getMessageQuestion(disease, nextQuestion);
         const question = nextQuestion.question;
@@ -116,7 +108,48 @@ class DiseasesDialog extends ComponentDialog {
                 prompt: message
             });
         }
+    }
 
+    async loopStep(step) {
+        const answersData = await this.UserDataCropAccessor.get(step.context);
+        const question = answersData.nextQuestion.question;
+        const fieldQuestion = answersData.nextQuestion.fieldQuestion;
+        const answerResult = step.result;
+        const disease = answersData.diseasesData.diseases[answersData.diseaseIndex];
+        let value, answer;
+        if (question.type == QuestionType.Options) {
+            answer = question;
+            value = question.options[answerResult.index];
+        }
+        else {//YESNO_PROMPT
+            answer = question.answers[answerResult];
+            value = answer.value; //TODO: to calculte value
+        }
+        if (answer.filter) {
+            if (_checkCondition(disease, answer.filter_condition)) {
+                answersData.diseasesData.diseases.splice(answersData.diseaseIndex, 1);
+                answersData.diseasesData.diseasesScoreData.splice(answersData.diseaseIndex, 1);
+                return await step.replaceDialog(NEXT_QUESTION_DIALOG);
+            }
+        }
+
+        const diseasesScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
+        let field = _.find(diseasesScoreData.fields, { name: fieldQuestion.label })
+        const score = this._getFirstScore(disease, answer.score_number);
+        if (!field) {
+            field = {};
+            diseasesScoreData.fields.push(field);
+        }
+        field.value = value;
+        field.name = fieldQuestion.label;
+        field.score = score.value;
+
+        return await step.replaceDialog(NEXT_QUESTION_DIALOG);
+    }
+    _getFirstScore(disease, scoreList) {
+        return _.first(scoreList, (score) => {
+            return _checkCondition(disease, score.condition);
+        })
     }
     _calculateFinalScore(diseaseScore) {
         //TODO: to return patogen Class
@@ -177,10 +210,7 @@ class DiseasesDialog extends ComponentDialog {
         return true;
     }
 
-    _calculateQuestionField(answersData, value) {
-        //if is filter - filter question by field
-        //if is score - score field
-    }
+
     filterAndScoreByField(field, value) {
 
     }

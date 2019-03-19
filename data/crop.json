@@ -59,7 +59,26 @@
                             }
                         ],
                         "filter": false,
-                        "score": false,
+                        "filter_condition": [],
+                        "score": true,
+                        "score_number": [
+                            {
+                                "value": 1,
+                                "condition": [
+                                    {
+                                        "field": "gdd",
+                                        "operation": ">=",
+                                        "value": 900
+                                    },
+                                    {
+                                        "operator": "and",
+                                        "field": "gdd",
+                                        "operation": "<",
+                                        "value": 1200
+                                    }
+                                ]
+                            }
+                        ],
                         "condition": [
                             {
                                 "field": "gdd",
@@ -80,7 +99,6 @@
                         "type": 0,
                         "answers": {
                             "false": {
-                                "answer": "true",
                                 "value": {
                                     "name": "Fruit set",
                                     "fromGDD": 900,
@@ -118,7 +136,6 @@
                                 ]
                             },
                             "true": {
-                                "answer": "false",
                                 "value": {
                                     "name": "Harvest",
                                     "fromGDD": 1200,
