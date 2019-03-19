@@ -7,22 +7,25 @@
             {
                 "name": "Vegetative",
                 "fromGDD": 30,
-                "toGDD": 450       
-            },{
+                "toGDD": 450
+            },
+            {
                 "name": "Flowering",
                 "fromGDD": 450,
                 "toGDD": 900
-            },{
+            },
+            {
                 "name": "Fruit set",
                 "fromGDD": 900,
                 "toGDD": 1200
-            },{
+            },
+            {
                 "name": "Harvest",
                 "fromGDD": 1200,
                 "toGDD": 6500
             }
         ],
-        "metaData":[
+        "metaData": [
             {
                 "name": "GDD",
                 "label": "gdd",
@@ -32,27 +35,31 @@
                         "id": 1,
                         "text": "what is the growth stage?",
                         "type": 1,
-                        "options":[
+                        "multi": false,
+                        "options": [
                             {
                                 "name": "Vegetative",
                                 "fromGDD": 30,
-                                "toGDD": 450       
-                            },{
+                                "toGDD": 450
+                            },
+                            {
                                 "name": "Flowering",
                                 "fromGDD": 450,
                                 "toGDD": 900
-                            },{
+                            },
+                            {
                                 "name": "Fruit set",
                                 "fromGDD": 900,
                                 "toGDD": 1200
-                            },{
+                            },
+                            {
                                 "name": "Harvest",
                                 "fromGDD": 1200,
                                 "toGDD": 6500
                             }
                         ],
                         "filter": false,
-                        "score": null,
+                        "score": false,
                         "condition": [
                             {
                                 "field": "gdd",
@@ -116,7 +123,7 @@
                                     "name": "Harvest",
                                     "fromGDD": 1200,
                                     "toGDD": 6500
-                                }, 
+                                },
                                 "filter": false,
                                 "score": true,
                                 "score_number": [
@@ -143,7 +150,6 @@
                                 ]
                             }
                         },
-                       
                         "condition": [
                             {
                                 "field": "gdd",
@@ -161,6 +167,5 @@
                 ]
             }
         ]
-        
     }
 ]

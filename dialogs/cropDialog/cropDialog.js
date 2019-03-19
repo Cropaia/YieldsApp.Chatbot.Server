@@ -17,8 +17,6 @@ const SELECTION_PROMPT = 'selectionPrompt',
     LOCATION_TYPE_SELECTION = 'locationTypes';
 const DATE_PROMPT = 'datePrompt';
 
-const cropList = require('./../../data/crop.json');
-
 const locationTypeList = [{ id: 1, name: 'leaves' }, { id: 2, name: 'stem' }, { id: 3, name: 'fruits' }, { id: 4, name: 'root' }]
 class CropDialog extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
@@ -86,6 +84,8 @@ class CropDialog extends ComponentDialog {
         console.log('userDataCrop', userDataCrop);
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
+            const cropList = require('./../../data/crop.json');
+
             let list = cropList.map((crop) => {
                 // var object = {};
                 //object[crop.name] = crop;
@@ -107,6 +107,7 @@ class CropDialog extends ComponentDialog {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
         if (userDataCrop.crop == undefined && step.result) {
             const text = step.result.value;
+            const cropList = require('./../../data/crop.json');
             let crop = cropList.find(x => x.name == text);
             userDataCrop.crop = crop;
         }
