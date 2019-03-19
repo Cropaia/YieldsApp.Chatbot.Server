@@ -14,8 +14,12 @@ const DISEASE_DIALOG = 'profileDialog';
 const ATTACHMENT_PROMPT = 'attachmentPrompt';
 const NEXT_QUESTION_DIALOG = 'nextQuestionDialog';
 const YESNO_PROMPT = 'yesnoPrompt';
-
 const SELECTION_PROMPT = 'selectionPromp';
+
+const QuestionType = {
+    Options: 1,
+    YesNo: 0
+}
 
 class DiseasesDialog extends ComponentDialog {
     constructor(dialogId, UserDataCropAccessor) {
@@ -82,11 +86,8 @@ class DiseasesDialog extends ComponentDialog {
             return await step.endDialog()
         }
         answersData.question = nextQuestion.question;
-        const message = this._getMessageQuestion(disease, nextQuestion);
-        //TODO: options or yesNo
-        return await step.prompt(YESNO_PROMPT, {
-            prompt: message
-        });
+
+        return await this._prompQuestion(step, disease, nextQuestion);
     }
 
     async loopStep(step) {
@@ -97,6 +98,24 @@ class DiseasesDialog extends ComponentDialog {
 
 
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
+
+    }
+    async _prompQuestion(step, disease, nextQuestion) {
+        const message = this._getMessageQuestion(disease, nextQuestion);
+        const question = nextQuestion.question;
+        if (question.type == QuestionType.Options) {
+            let list = question.options.map((option) => {
+                return option.name;
+            });
+            return await step.prompt(SELECTION_PROMPT, {
+                prompt: message,
+                choices: list
+            });
+        } else {
+            return await step.prompt(YESNO_PROMPT, {
+                prompt: message
+            });
+        }
 
     }
     _calculateFinalScore(diseaseScore) {
