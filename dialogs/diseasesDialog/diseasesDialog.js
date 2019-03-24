@@ -201,12 +201,68 @@ class DiseasesDialog extends ComponentDialog {
         //diseaseMetaData
         return _.find(diseasesMetaData, { label: fieldName });
     }
-    _getMessageQuestion(disease, question) {
-        //TODO: to change it
+   _getMessageQuestion(disease, question) {
+        for (let key in disease) {
+            if (question.fieldQuestion.label == key)
+                return question.question.text.replace("{{value}}", disease[key]);
+        }
+        
         return question.question.text;
     }
+
     _checkCondition(disease, condition) {
-        //TODO: to fill it 
+        let field;
+        for (let i = 0; i < condition.length; i++) {
+
+            for (let key in disease) {
+                if (condition[i].field == key)
+                {
+                     field = key;
+                     break;
+                }
+            }
+
+            switch (condition[i].operation) {
+                case '<':
+                    if (disease[field] < condition[i].value) {
+                        return true;
+                    }
+                    break;
+                case '>':
+                    if (disease[field] > condition[i].value) {
+                        return true;
+                    }
+
+                    break;
+                case '=':
+                    if (disease[field] == condition[i].value) {
+                        return true;
+                    }
+
+                    break;
+                case '!=':
+                    if (disease[field] != condition[i].value) {
+                        return true;
+                    }
+
+                    break;
+                case '<=':
+                    if (disease[field] <= condition[i].value) {
+                        return true;
+                    }
+
+                    break;
+                case '>=':
+                    if (disease[field] >= condition[i].value) {
+                        return true;
+                    }
+                case '': {
+                    return true;
+                }
+                    break;
+                default: { return false; }
+            }
+        }
         return true;
     }
 
