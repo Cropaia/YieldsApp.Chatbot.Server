@@ -6,7 +6,7 @@ const FormData = require('form-data');
 const { getAwareNorms } = require('./aware-api');
 
 const { DiseasesData } = require('../../data/diseasesData');
-
+const { DiseasesCondition } = require('./diseasesCondition');
 // Dialog IDs 
 const DISEASE_DIALOG = 'profileDialog';
 
@@ -68,7 +68,7 @@ class DiseasesDialog extends ComponentDialog {
             const disease = answersData.diseasesData.diseases[0];
             const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
             const score = this._calculateFinalScore(diseaseScore)
-            await step.context.sendActivity(`Your Disease is ${disease.pathogenName} with score of ${score}`);
+            await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
             return await step.endDialog()
         } else if (countDiseases == 0) {
             await step.context.sendActivity(`Didn't found your disease`);
@@ -77,12 +77,12 @@ class DiseasesDialog extends ComponentDialog {
 
 
         const disease = answersData.diseasesData.diseases[0];
+        const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
         const crop = answersData.crop;
-        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, crop);
+        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, diseaseScore, crop);
         if (nextQuestion == null) {
-            const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
             const score = this._calculateFinalScore(diseaseScore)
-            await step.context.sendActivity(`Your Disease is ${disease.pathogenName} with score of ${score}`);
+            await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
             return await step.endDialog()
         }
         answersData.nextQuestion = nextQuestion;
@@ -96,7 +96,8 @@ class DiseasesDialog extends ComponentDialog {
         const message = this._getMessageQuestion(disease, nextQuestion);
         const question = nextQuestion.question;
         if (question.type == QuestionType.Options) {
-            let list = question.options.map((option) => {
+            question.listOptions = _.concat(question.options, question.defulatOptions || []);
+            let list = question.listOptions.map((option) => {
                 return option.name;
             });
             return await step.prompt(SELECTION_PROMPT, {
@@ -119,43 +120,46 @@ class DiseasesDialog extends ComponentDialog {
         let value, answer;
         if (question.type == QuestionType.Options) {
             answer = question;
-            value = question.options[answerResult.index];
+            value = question.listOptions[answerResult.index];
         }
         else {//YESNO_PROMPT
             answer = question.answers[answerResult];
             value = answer.value; //TODO: to calculte value
         }
+
+        const currentDiseaseScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
+        let field = _.find(currentDiseaseScoreData.fields, { name: fieldQuestion.label })
+        if (!field) {
+            field = {};
+            currentDiseaseScoreData.fields.push(field);
+        }
+        field.value = value;
+        field.name = fieldQuestion.label;
+        const score = this._getFirstScore(disease, currentDiseaseScoreData, answer.score_number);
+        field.score = score.value;
+
+
+
         if (answer.filter) {
-            if (_checkCondition(disease, answer.filter_condition)) {
+            if (this._checkCondition(disease, currentDiseaseScoreData, answer.filter_conditions)) {
                 answersData.diseasesData.diseases.splice(answersData.diseaseIndex, 1);
                 answersData.diseasesData.diseasesScoreData.splice(answersData.diseaseIndex, 1);
                 return await step.replaceDialog(NEXT_QUESTION_DIALOG);
             }
         }
 
-        const diseasesScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
-        let field = _.find(diseasesScoreData.fields, { name: fieldQuestion.label })
-        const score = this._getFirstScore(disease, answer.score_number);
-        if (!field) {
-            field = {};
-            diseasesScoreData.fields.push(field);
-        }
-        field.value = value;
-        field.name = fieldQuestion.label;
-        field.score = score.value;
-
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
     }
-    _getFirstScore(disease, scoreList) {
+    _getFirstScore(disease, diseaseScoreData, scoreList) {
         return _.first(scoreList, (score) => {
-            return _checkCondition(disease, score.condition);
+            return _checkCondition(disease, diseaseScoreData, score.conditions);
         })
     }
     _calculateFinalScore(diseaseScore) {
         //TODO: to return patogen Class
         return 0.8 * 100;
     }
-    _getNextQuestion(diseasesMetaData, disease, crop) {
+    _getNextQuestion(diseasesMetaData, disease, diseaseScore, crop) {
         let fieldQuestion = null;;
         while (disease.policies.questions_order.length > 0) {
             const fieldName = disease.policies.questions_order[0];
@@ -163,7 +167,7 @@ class DiseasesDialog extends ComponentDialog {
             let question = null;
             while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
-                if (this._checkCondition(disease, question.condition)) {
+                if (this._checkCondition(disease, diseaseScore, question.conditions)) {
                     if (fieldQuestion.questions.length == 0) {
                         //move to next field's question
                         disease.policies.questions_order.shift();
@@ -176,7 +180,6 @@ class DiseasesDialog extends ComponentDialog {
             }
             disease.policies.questions_order.shift();
         }
-
 
         return null;
     }
@@ -201,69 +204,19 @@ class DiseasesDialog extends ComponentDialog {
         //diseaseMetaData
         return _.find(diseasesMetaData, { label: fieldName });
     }
-   _getMessageQuestion(disease, question) {
+    _getMessageQuestion(disease, question) {
         for (let key in disease) {
             if (question.fieldQuestion.label == key)
-                return question.question.text.replace("{{value}}", disease[key]);
+                return question.question.text.replace("{{   }}", disease[key]);
         }
-        
+
         return question.question.text;
     }
 
-    _checkCondition(disease, condition) {
-        let field;
-        for (let i = 0; i < condition.length; i++) {
-
-            for (let key in disease) {
-                if (condition[i].field == key)
-                {
-                     field = key;
-                     break;
-                }
-            }
-
-            switch (condition[i].operation) {
-                case '<':
-                    if (disease[field] < condition[i].value) {
-                        return true;
-                    }
-                    break;
-                case '>':
-                    if (disease[field] > condition[i].value) {
-                        return true;
-                    }
-
-                    break;
-                case '=':
-                    if (disease[field] == condition[i].value) {
-                        return true;
-                    }
-
-                    break;
-                case '!=':
-                    if (disease[field] != condition[i].value) {
-                        return true;
-                    }
-
-                    break;
-                case '<=':
-                    if (disease[field] <= condition[i].value) {
-                        return true;
-                    }
-
-                    break;
-                case '>=':
-                    if (disease[field] >= condition[i].value) {
-                        return true;
-                    }
-                case '': {
-                    return true;
-                }
-                    break;
-                default: { return false; }
-            }
-        }
-        return true;
+    _checkCondition(disease, diseaseScoreData, conditions) {
+        var diseasesCondition = new DiseasesCondition(disease, diseaseScoreData);
+        const result = diseasesCondition.checkConditions(conditions);
+        return result;
     }
 
 
@@ -302,11 +255,11 @@ class DiseasesDialog extends ComponentDialog {
                 let answerPicture = [];
                 if (result && result.classes) {
                     result.classes.forEach((clazz, index) => {
-                        answerPicture.push({ pathogenClass: clazz, score: result.proba[index] })
+                        answerPicture.push({ diseaseNameClass: clazz, score: result.proba[index] })
                     });
                 }
                 answerPicture = _.orderBy(answerPicture, 'score', 'desc');
-                //TODO: to add this diseasesScoreData in field named pathogenClass
+                //TODO: to add this diseasesScoreData in field named diseaseNameClass
                 diseasesData.answerPicture = answerPicture;
 
 
@@ -329,7 +282,7 @@ class DiseasesDialog extends ComponentDialog {
         const growthStage = this._calculateGrowthStageByGDD(crop, GDD);
 
         //filter+ score diseases
-        this._filterByTemperatureList(diseasesData, tempList);
+        //this._filterByTemperatureList(diseasesData, tempList);
         this._filterByGrowthStage(diseasesData, growthStage);
         this._filterByRegion(diseasesData, location);
     }
@@ -522,7 +475,8 @@ class DiseasesDialog extends ComponentDialog {
                 const name = "location_" + current
                 return {
                     score: 1,
-                    name: name
+                    name: name,
+                    value: true
                 }
             });
 
