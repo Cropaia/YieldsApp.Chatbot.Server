@@ -1,7 +1,7 @@
 [
     {
         "id": 1,
-        "name": "tomato",
+        "name": "Tomato",
         "minimumTemperatureForGdd": 50,
         "growthStages": [
             {
