@@ -89,11 +89,11 @@ class DiseasesDialog extends ComponentDialog {
         answersData.disease = disease;
         answersData.diseaseIndex = 0;
 
-        return await this._prompQuestion(step, disease, nextQuestion);
+        return await this._prompQuestion(step, disease, answersData.diseasesData, nextQuestion);
     }
 
-    async _prompQuestion(step, disease, nextQuestion) {
-        const message = this._getMessageQuestion(disease, nextQuestion);
+    async _prompQuestion(step, disease, diseasesData, nextQuestion) {
+        const message = this._getMessageQuestion(disease, diseasesData, nextQuestion);
         const question = nextQuestion.question;
         if (question.type == QuestionType.Options) {
             question.listOptions = _.concat(question.options, question.defulatOptions || []);
@@ -126,7 +126,7 @@ class DiseasesDialog extends ComponentDialog {
             answer = question.answers[answerResult];
             value = answer.value; //TODO: to calculte value
         }
-
+        answersData.diseasesData.answerData[fieldQuestion.label] = value;
         const currentDiseaseScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
         let field = _.find(currentDiseaseScoreData.fields, { name: fieldQuestion.label })
         if (!field) {
@@ -137,8 +137,6 @@ class DiseasesDialog extends ComponentDialog {
         field.name = fieldQuestion.label;
         const score = this._getFirstScore(disease, currentDiseaseScoreData, answer.score_number);
         field.score = score.value;
-
-
 
         if (answer.filter) {
             if (this._checkCondition(disease, currentDiseaseScoreData, answer.filter_conditions)) {
@@ -204,13 +202,26 @@ class DiseasesDialog extends ComponentDialog {
         //diseaseMetaData
         return _.find(diseasesMetaData, { label: fieldName });
     }
-    _getMessageQuestion(disease, question) {
-        for (let key in disease) {
-            if (question.fieldQuestion.label == key)
-                return question.question.text.replace("{{   }}", disease[key]);
+    _getMessageQuestion(disease, diseasesData, question) {
+        let text = question.question.text;
+        if (disease[question.fieldQuestion.label]) {
+            text = text.replace("{{value}}", disease[question.fieldQuestion.label]);
         }
 
-        return question.question.text;
+        let openBracket = 0, closeBracket = 0, textBracketKey = '';
+        while (openBracket!=-1 && closeBracket != -1) {
+            openBracket = text.indexOf("{{", closeBracket);
+            if (openBracket!=-1){
+                closeBracket = text.indexOf("}}", openBracket);
+                if(closeBracket!=-1){
+                    textBracketKey = text.substring(openBracket, closeBracket+2);
+                    //TODO: to replace it
+                }
+            }
+        }
+
+
+        return text;
     }
 
     _checkCondition(disease, diseaseScoreData, conditions) {
@@ -296,6 +307,8 @@ class DiseasesDialog extends ComponentDialog {
 
         const humidityList = list.humidity;
 
+        // let temperatureList = [];
+        // let humidityList = [];
         return { temperature: temperatureList, humidity: humidityList };
     }
 

@@ -8,6 +8,7 @@ class DiseasesData {
         this.diseases = this._getDiseases();
         this.diseasesScoreData = this._getDiseasesScoreData();
         this.diseasesMetaData = this._getDiseasesMetaData();
+        this.answerData = {};
     }
 
     _getDiseases() {
