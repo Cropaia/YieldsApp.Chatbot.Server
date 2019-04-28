@@ -4,10 +4,10 @@
     "services": [
         {
             "type": "endpoint",
-            "appId": "db0a3f3c-3006-4e15-9a12-b4307a071ca4",
-            "appPassword": "RnQNZep{3Zo@-ds[.}DZ|w&t9pY",
+            "appId": "456f1a6b-ffb9-4048-a6d9-ce03e10d4c52",
+            "appPassword": "9P$7)hL!=DSC@ROs@K.OBOIY",
             "endpoint": "https://yieldsappbotapp.azurewebsites.net/api/messages",
-            "id": "b2bf5b30-69d0-11e9-92f6-d9ee7c8e4cb8",
+            "id": "2",
             "name": "production"
         },
         {
