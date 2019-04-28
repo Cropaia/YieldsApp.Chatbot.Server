@@ -1,27 +1,22 @@
 {
-    "name": "production",
+    "name": "YieldsAppBotApp",
     "description": "",
     "services": [
         {
             "type": "endpoint",
             "appId": "456f1a6b-ffb9-4048-a6d9-ce03e10d4c52",
-            "appPassword": "9P$7)hL!=DSC@ROs@K.OBOIY",
+            "appPassword": "+EtV4o7mYMxNqG9eC7kojg==!/pPcRHyehEC91QEGEI7f0Hqxwu0rfQMr30v0oIx1KrM=",
             "endpoint": "https://yieldsappbotapp.azurewebsites.net/api/messages",
-            "id": "2",
+            "id": "42888de0-69ea-11e9-9c2c-8f6dc5bbcc7f",
             "name": "production"
         },
         {
-            "appId": "",
-            "appPassword": "",
-            "endpoint": "http://localhost:3978/api/messages",
             "type": "endpoint",
+            "endpoint": "http://localhost:3978/api/messages",
             "name": "development",
-            "id": "3"
-        },
-        
+            "id": "49"
+        }
     ],
-    "padlock": "",
-    "version": "2.0",
-    "overrides": null,
-    "path": "C:\\Projects\\YieldsApp.Chatbot.Server\\yieldsappbotapp.bot"
+    "padlock": "I8wyc3yq0DssyLQdWdjOrg==!ipeQ5ZcX54Ut16GMAdU0wveXTDjrLCnClugjIc/WT8oweNgEeOsGwbk4RQ01dBcR",
+    "version": "2.0"
 }
