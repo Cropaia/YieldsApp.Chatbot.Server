@@ -136,6 +136,7 @@ class DiseasesDialog extends ComponentDialog {
         field.value = value;
         field.name = fieldQuestion.label;
         const score = this._getFirstScore(disease, currentDiseaseScoreData, answer.score_number);
+        //TODO: if score = null
         field.score = score.value;
 
         if (answer.filter) {
@@ -209,13 +210,28 @@ class DiseasesDialog extends ComponentDialog {
         }
 
         let openBracket = 0, closeBracket = 0, textBracketKey = '';
-        while (openBracket!=-1 && closeBracket != -1) {
+        while (openBracket != -1 && closeBracket != -1) {
             openBracket = text.indexOf("{{", closeBracket);
-            if (openBracket!=-1){
+            if (openBracket != -1) {
                 closeBracket = text.indexOf("}}", openBracket);
-                if(closeBracket!=-1){
-                    textBracketKey = text.substring(openBracket, closeBracket+2);
-                    //TODO: to replace it
+                if (closeBracket != -1) {
+                    textBracketKey = text.substring(openBracket, closeBracket + 2);
+                    let userAnswer = false, field = "", value = "";
+                    const textKeys = textBracketKey.replace("{{", "").replace("}}", "").split(".");
+                    if (textKeys.length > 1) {
+                        userAnswer = textKeys[0] == "userAnswer";
+                        field = textKeys[1];
+                    } else {
+                        userAnswer = false;
+                        field = textKeys[0];
+                    }
+
+                    if (userAnswer) {
+                        value = this._getAnswerDataValue(field, diseasesData.answerData)
+                    } else {
+                        value = this._getDiseaseValue(field, disease)
+                    }
+                    text = text.replace(textBracketKey, value);
                 }
             }
         }
@@ -223,7 +239,16 @@ class DiseasesDialog extends ComponentDialog {
 
         return text;
     }
+    _getAnswerDataValue(field, answerData) {
+        const value = answerData[field];
+        if (_.isObject(value) && value.value)
+            return value.name;
+        return value;
+    }
 
+    _getDiseaseValue(field, disease) {
+        return disease[field];
+    }
     _checkCondition(disease, diseaseScoreData, conditions) {
         var diseasesCondition = new DiseasesCondition(disease, diseaseScoreData);
         const result = diseasesCondition.checkConditions(conditions);
