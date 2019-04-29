@@ -220,7 +220,7 @@
                 "questions": [
                     {
                         "id": 1,
-                        "text": "Do you see target-like concentric circles inside the {{leaves_symptomType}}?",
+                        "text": "Do you see target-like concentric circles inside the {{userAnswer.leaves_symptomType}}?",
                         "type": 0,
                         "answers": {
                             "true": {
@@ -266,7 +266,7 @@
                 "questions": [
                     {
                         "id": 1,
-                        "text": "What is the color of the {{leaves_symptom_pattern}}?",
+                        "text": "What is the color of the {{userAnswer.leaves_symptom_pattern}}?",
                         "type": 1,
                         "options": [
                             {
