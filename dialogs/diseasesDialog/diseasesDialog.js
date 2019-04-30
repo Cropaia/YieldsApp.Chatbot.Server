@@ -62,7 +62,8 @@ class DiseasesDialog extends ComponentDialog {
     async selectionStep(step) {
         const answersData = await this.UserDataCropAccessor.get(step.context);
 
-        this.orderDiseases(answersData);
+        this.calculateDiseasesScore(answersData.diseasesData);
+        this.orderDiseases(answersData.diseasesData);
         const countDiseases = answersData.diseasesData.diseases.length;
         if (countDiseases == 1) {
             const disease = answersData.diseasesData.diseases[0];
@@ -256,11 +257,22 @@ class DiseasesDialog extends ComponentDialog {
     }
 
 
-    filterAndScoreByField(field, value) {
+    calculateDiseasesScore(diseasesData) {
+        //TODO:  to calculate fieldCalculate by avg of diseasesScoreData scores
+        _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
+            const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
+            diseasesData.diseases.score.fieldCalculate = avg;
+
+            const currentDisease = diseasesData.diseases[index];
+            let finalScore = avg, pictueScore = currentDisease.score.picture;
+            if (pictueScore > 0) finalScore = _.mean([finalScore, pictueScore]);
+            currentDisease.score.finalScore = finalScore;
+        });
 
     }
-
-    orderDiseases() {
+    
+    orderDiseases(diseasesData) {
+        //TODO: to order by finalScore
         //diseases
         //diseasesScoreData
     }
@@ -283,7 +295,6 @@ class DiseasesDialog extends ComponentDialog {
         var form = new FormData();
         form.append('image', image);
         form.submit(process.env.PictureAI_Path, function (err, res) {
-            // res – response object (http.IncomingMessage)  //
             res.resume();
             res.on('data', function (chunk) {
                 console.log(res.statusCode);
@@ -291,17 +302,24 @@ class DiseasesDialog extends ComponentDialog {
                 let answerPicture = [];
                 if (result && result.classes) {
                     result.classes.forEach((clazz, index) => {
-                        answerPicture.push({ diseaseNameClass: clazz, score: result.proba[index] })
+                        answerPicture.push({ label: clazz, score: result.proba[index] });
+
                     });
                 }
                 answerPicture = _.orderBy(answerPicture, 'score', 'desc');
-                //TODO: to add this diseasesScoreData in field named diseaseNameClass
                 diseasesData.answerPicture = answerPicture;
+                _.forEach(diseasesData.diseases, disease => {
+                    const pictureScore = 0 //_.find(answerPicture,) 
+                    //TODO: to find the score in answerPicture by label otherwize= 0
+                    disease.score = {
+                        picture: pictureScore,
+                        fieldCalculate: 0,
+                        final: 0
+                    };
+                });
 
 
-                //TODO: to order by the specific functions
             });
-
         });
 
     }
@@ -323,7 +341,7 @@ class DiseasesDialog extends ComponentDialog {
         this._filterByRegion(diseasesData, location);
     }
 
-    async _calculateTemperature(crop, location, plantingDate = new Date('01/01/2019')) {
+    async _calculateTemperature(crop, location, plantingDate) {
         //weazer get temperature + humidity of last two weeks
         //returns temperature + humidity list
 

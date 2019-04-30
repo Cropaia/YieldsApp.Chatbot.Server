@@ -8,6 +8,9 @@ class DiseasesData {
         this.diseases = this._getDiseases();
         this.diseasesScoreData = this._getDiseasesScoreData();
         this.diseasesMetaData = this._getDiseasesMetaData();
+        this.answerPicture = [];
+        //as diseasesScoreData
+        //TODO: to check we can delete it
         this.answerData = {};
     }
 
