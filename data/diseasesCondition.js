@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const  { DiseasesData } = require('./diseasesData');
+
 const OPERATOR = {
     OR: "or",
     AND: "and"
@@ -6,9 +8,10 @@ const OPERATOR = {
 
 
 class DiseasesCondition {
-    constructor(disease, diseaseScoreData) {
+    constructor(disease, diseaseScoreData, answerData) {
         this.disease = disease;
         this.diseaseScoreData = diseaseScoreData;
+        this.answerData = answerData;
     }
 
     checkConditions(conditions, operator = OPERATOR.AND) {
@@ -34,13 +37,8 @@ class DiseasesCondition {
     }
 
     _isConditionCorrect(condition) {
-        let fieldValue;
-        if (condition.userAnswer) {
-            fieldValue = this._getDiseaseScoreValue(condition);
-            if(!fieldValue) return false;
-        } else {
-            fieldValue = this._getDiseaseValue(condition);
-        }
+        let fieldValue = DiseasesData.findFieldValue(condition.field, this.disease, this.answerData);
+
 
         switch (condition.operation) {
             case '<':
@@ -55,26 +53,12 @@ class DiseasesCondition {
                 return fieldValue <= condition.value;
             case '>=':
                 return fieldValue >= condition.value;
-            case '': 
+            case '':
                 return true;
-            default: 
+            default:
                 return false;
         }
     }
-
-    _getDiseaseScoreValue(condition) {
-        const field = _.find(this.diseaseScoreData.fields, { name: condition.field });
-        const value = field.value;
-        if (_.isObject(value) && value.value)
-            return value.value;
-        return value;
-    }
-
-    _getDiseaseValue(condition) {
-        return this.disease[condition.field];
-    }
-
-
 
     _getOperator(conditon) {
         if (!conditon.operator) return null;

@@ -6,7 +6,7 @@ const FormData = require('form-data');
 const { getAwareNorms } = require('./aware-api');
 
 const { DiseasesData } = require('../../data/diseasesData');
-const { DiseasesCondition } = require('./diseasesCondition');
+const { DiseasesCondition } = require('../../data/diseasesCondition');
 // Dialog IDs 
 const DISEASE_DIALOG = 'profileDialog';
 
@@ -76,11 +76,11 @@ class DiseasesDialog extends ComponentDialog {
             return await step.endDialog()
         }
 
-
         const disease = answersData.diseasesData.diseases[0];
         const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
+        const answerData = answersData.diseasesData.answerData;
         const crop = answersData.crop;
-        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, diseaseScore, crop);
+        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, diseaseScore, answerData, crop);
         if (nextQuestion == null) {
             const score = this._calculateFinalScore(diseaseScore)
             await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
@@ -129,6 +129,7 @@ class DiseasesDialog extends ComponentDialog {
         }
         answersData.diseasesData.answerData[fieldQuestion.label] = value;
         const currentDiseaseScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
+        const answerData = answersData.diseasesData.answerData;
         let field = _.find(currentDiseaseScoreData.fields, { name: fieldQuestion.label })
         if (!field) {
             field = {};
@@ -136,12 +137,12 @@ class DiseasesDialog extends ComponentDialog {
         }
         field.value = value;
         field.name = fieldQuestion.label;
-        const score = this._getFirstScore(disease, currentDiseaseScoreData, answer.score_number);
+        const score = this._getFirstScore(disease, currentDiseaseScoreData, answerData, answer.score_number);
         //TODO: if score = null
         field.score = score.value;
 
         if (answer.filter) {
-            if (this._checkCondition(disease, currentDiseaseScoreData, answer.filter_conditions)) {
+            if (this._checkCondition(disease, currentDiseaseScoreData, answerData, answer.filter_conditions)) {
                 answersData.diseasesData.diseases.splice(answersData.diseaseIndex, 1);
                 answersData.diseasesData.diseasesScoreData.splice(answersData.diseaseIndex, 1);
                 return await step.replaceDialog(NEXT_QUESTION_DIALOG);
@@ -150,16 +151,16 @@ class DiseasesDialog extends ComponentDialog {
 
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
     }
-    _getFirstScore(disease, diseaseScoreData, scoreList) {
+    _getFirstScore(disease, diseaseScoreData, answerData, scoreList) {
         return _.first(scoreList, (score) => {
-            return _checkCondition(disease, diseaseScoreData, score.conditions);
+            return _checkCondition(disease, diseaseScoreData, answerData, score.conditions);
         })
     }
     _calculateFinalScore(diseaseScore) {
         //TODO: to return patogen Class
         return 0.8 * 100;
     }
-    _getNextQuestion(diseasesMetaData, disease, diseaseScore, crop) {
+    _getNextQuestion(diseasesMetaData, disease, diseaseScore, answerData, crop) {
         let fieldQuestion = null;;
         while (disease.policies.questions_order.length > 0) {
             const fieldName = disease.policies.questions_order[0];
@@ -167,7 +168,7 @@ class DiseasesDialog extends ComponentDialog {
             let question = null;
             while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
-                if (this._checkCondition(disease, diseaseScore, question.conditions)) {
+                if (this._checkCondition(disease, diseaseScore, answerData, question.conditions)) {
                     if (fieldQuestion.questions.length == 0) {
                         //move to next field's question
                         disease.policies.questions_order.shift();
@@ -217,60 +218,36 @@ class DiseasesDialog extends ComponentDialog {
                 closeBracket = text.indexOf("}}", openBracket);
                 if (closeBracket != -1) {
                     textBracketKey = text.substring(openBracket, closeBracket + 2);
-                    let userAnswer = false, field = "", value = "";
-                    const textKeys = textBracketKey.replace("{{", "").replace("}}", "").split(".");
-                    if (textKeys.length > 1) {
-                        userAnswer = textKeys[0] == "userAnswer";
-                        field = textKeys[1];
-                    } else {
-                        userAnswer = false;
-                        field = textKeys[0];
-                    }
-
-                    if (userAnswer) {
-                        value = this._getAnswerDataValue(field, diseasesData.answerData)
-                    } else {
-                        value = this._getDiseaseValue(field, disease)
-                    }
+                    const textKey = textBracketKey.replace("{{", "").replace("}}", "");
+                    const value = DiseasesData.findFieldValue(textKey, disease, diseasesData.answerData);
                     text = text.replace(textBracketKey, value);
                 }
             }
         }
 
-
         return text;
     }
-    _getAnswerDataValue(field, answerData) {
-        const value = answerData[field];
-        if (_.isObject(value) && value.value)
-            return value.name;
-        return value;
-    }
 
-    _getDiseaseValue(field, disease) {
-        return disease[field];
-    }
-    _checkCondition(disease, diseaseScoreData, conditions) {
-        var diseasesCondition = new DiseasesCondition(disease, diseaseScoreData);
+    _checkCondition(disease, diseaseScoreData, answerData, conditions) {
+        var diseasesCondition = new DiseasesCondition(disease, diseaseScoreData, answerData);
         const result = diseasesCondition.checkConditions(conditions);
         return result;
     }
 
-
     calculateDiseasesScore(diseasesData) {
         //TODO:  to calculate fieldCalculate by avg of diseasesScoreData scores
-        _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
-            const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
-            diseasesData.diseases.score.fieldCalculate = avg;
+        // _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
+        //     const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
+        //     diseasesData.diseases.score.fieldCalculate = avg;
 
-            const currentDisease = diseasesData.diseases[index];
-            let finalScore = avg, pictueScore = currentDisease.score.picture;
-            if (pictueScore > 0) finalScore = _.mean([finalScore, pictueScore]);
-            currentDisease.score.finalScore = finalScore;
-        });
+        //     const currentDisease = diseasesData.diseases[index];
+        //     let finalScore = avg, pictueScore = currentDisease.score.picture;
+        //     if (pictueScore > 0) finalScore = _.mean([finalScore, pictueScore]);
+        //     currentDisease.score.finalScore = finalScore;
+        // });
 
     }
-    
+
     orderDiseases(diseasesData) {
         //TODO: to order by finalScore
         //diseases
@@ -285,7 +262,7 @@ class DiseasesDialog extends ComponentDialog {
         this._initDataByPicture(answersData.diseasesData, answersData.pictures);
         this._initDataByCrop(answersData.diseasesData, answersData.crop);
         await this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
-        this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);
+        this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);        
     }
 
     _initDataByPicture(diseasesData, pictures) {
@@ -327,6 +304,7 @@ class DiseasesDialog extends ComponentDialog {
     _initDataByCrop(diseasesData, crop) {
         //filter+score diseases by crop 
         //now we don't have any filter by crop..
+        diseasesData.answerData.crop = crop;
     }
 
     /**_initDataByLocation */
@@ -517,6 +495,11 @@ class DiseasesDialog extends ComponentDialog {
 
         diseasesData.diseases = diseases;
         diseasesData.diseasesScoreData = diseasesScoreData;
+
+        //fill answer for location
+        locationTypes.forEach(location=>{
+            diseasesData.location = diseasesData.answerData['location_' + location]= true;
+        })
 
     }
 

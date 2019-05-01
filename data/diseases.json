@@ -112,19 +112,19 @@
                 {
                     "conditions": [
                         {
-                            "field": "leaves_symptomType",
+                            "field": "userAnswer.leaves_symptomType.name",
                             "operation": "=",
                             "value": "lesions"
                         },
                         {
                             "operator": "and",
-                            "field": "leaves_symptom_pattern",
+                            "field": "userAnswer.leaves_symptom_pattern.name",
                             "operation": "=",
                             "value": "concentric circles"
                         },
                         {
                             "operator": "and",
-                            "field": "leaves_pattern_color",
+                            "field": "userAnswer.leaves_pattern_color.name",
                             "operation": "=",
                             "value": "Brown/Dark"
                         }
@@ -171,10 +171,9 @@
                         "filter": true,
                         "filter_conditions": [
                             {
-                                "field": "leaves_symptomType",
+                                "field": "userAnswer.leaves_symptomType.name",
                                 "operation": "=",
-                                "value": 0,
-                                "userAnswer": true
+                                "value": "None of those"
                             }
                         ],
                         "score": true,
@@ -186,16 +185,14 @@
                                         "operator": "or",
                                         "conditions": [
                                             {
-                                                "field": "leaves_symptomType",
+                                                "field": "userAnswer.leaves_symptomType.name",
                                                 "operation": "=",
-                                                "value": 1,
-                                                "userAnswer": true
+                                                "value": "lesions"
                                             },
                                             {
-                                                "field": "leaves_symptomType",
+                                                "field": "userAnswer.leaves_symptomType.name",
                                                 "operation": "=",
-                                                "value": 2,
-                                                "userAnswer": true
+                                                "value": "spots"
                                             }
                                         ]
                                     }
@@ -204,10 +201,9 @@
                         ],
                         "conditions": [
                             {
-                                "field": "location_leaves",
+                                "field": "userAnswer.location_leaves",
                                 "operation": "=",
-                                "value": true,
-                                "userAnswer": true
+                                "value": true
                             }
                         ]
                     }
@@ -220,7 +216,7 @@
                 "questions": [
                     {
                         "id": 1,
-                        "text": "Do you see target-like concentric circles inside the {{userAnswer.leaves_symptomType}}?",
+                        "text": "Do you see target-like concentric circles inside the {{userAnswer.leaves_symptomType.name}}?",
                         "type": 0,
                         "answers": {
                             "true": {
@@ -250,10 +246,9 @@
                         },
                         "conditions": [
                             {
-                                "field": "location_leaves",
+                                "field": "userAnswer.location_leaves",
                                 "operation": "=",
-                                "value": true,
-                                "userAnswer": true
+                                "value": true
                             }
                         ]
                     }
@@ -266,7 +261,7 @@
                 "questions": [
                     {
                         "id": 1,
-                        "text": "What is the color of the {{userAnswer.leaves_symptom_pattern}}?",
+                        "text": "What is the color of the {{userAnswer.leaves_symptom_pattern.name}}?",
                         "type": 1,
                         "options": [
                             {
@@ -290,7 +285,7 @@
                                 "value": 1,
                                 "conditions": [
                                     {
-                                        "field": "leaves_pattern_color",
+                                        "field": "userAnswer.leaves_pattern_color.name",
                                         "operation": "=",
                                         "value": "Brown/Dark"
                                     }
@@ -300,7 +295,7 @@
                                 "value": 0,
                                 "conditions": [
                                     {
-                                        "field": "leaves_pattern_color",
+                                        "field": "userAnswer.leaves_pattern_color.name",
                                         "operation": "=",
                                         "value": "None of those"
                                     }
@@ -314,7 +309,7 @@
                         "type": 1,
                         "options": [
                             {
-                                "name": "Yellow halo around the {{leaves_symptomType}}"
+                                "name": "Yellow halo around the {{userAnswer.leaves_symptomType.name}}"
                             },
                             {
                                 "name": "the concentric circles themslves are yellow"
@@ -329,7 +324,7 @@
                         "filter": true,
                         "filter_conditions": [
                             {
-                                "field": "leaves_pattern_color",
+                                "field": "userAnswer.leaves_pattern_color.name",
                                 "operation": "=",
                                 "value": "the concentric circles themslves are yellow"
                             }
@@ -340,7 +335,7 @@
                                 "value": 1,
                                 "conditions": [
                                     {
-                                        "field": "leaves_pattern_color",
+                                        "field": "userAnswer.leaves_pattern_color.name",
                                         "operation": "=",
                                         "value": "Yellow halo around the {{leaves_symptomType}}"
                                     }

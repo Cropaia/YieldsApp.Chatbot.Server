@@ -17,46 +17,6 @@
         "options": [
             "all",
             "us"
-        ],
-        "questions": [
-            {
-                "id": 1,
-                "text": "Is your region is {{value}}?",
-                "type": 0,
-                "answers": {
-                    "true": {
-                        "value": "{{value}}",
-                        "filter": false,
-                        "filter_conditions": [],
-                        "score": true,
-                        "score_number": [
-                            {
-                                "value": 1,
-                                "conditions": []
-                            }
-                        ]
-                    },
-                    "false": {
-                        "value": null,
-                        "filter": true,
-                        "filter_conditions": [],
-                        "score": true,
-                        "score_number": [
-                            {
-                                "value": 0.5,
-                                "conditions": []
-                            }
-                        ]
-                    }
-                },
-                "conditions": [
-                    {
-                        "field": "region",
-                        "operation": "!=",
-                        "value": "null"
-                    }
-                ]
-            }
         ]
     },
     {
@@ -168,63 +128,6 @@
             "lesions",
             "spots",
             "blotches"
-        ],
-        "questions": [
-            {
-                "id": 1,
-                "text": "What is the type of symptom do you see on the leaves?",
-                "type": 1,
-                "options": [
-                    {
-                        "name": "lesions"
-                    },
-                    {
-                        "name": "spots"
-                    }
-                ],
-                "multi": false,
-                "defulatOptions": [
-                    {
-                        "name": "None of those"
-                    }
-                ],
-                "filter": true,
-                "filter_conditions": [
-                    {
-                        "field": "leaves_symptomType",
-                        "operation": "=",
-                        "value": [
-                            "None of those"
-                        ]
-                    }
-                ],
-                "score": true,
-                "score_number": [
-                    {
-                        "value": 1,
-                        "conditions": [
-                            {
-                                "field": "leaves_symptomType",
-                                "operation": "=",
-                                "value": "lesions"
-                            },
-                            {
-                                "operator": "or",
-                                "field": "leaves_symptomType",
-                                "operation": "=",
-                                "value": "spots"
-                            }
-                        ]
-                    }
-                ],
-                "conditions": [
-                    {
-                        "field": "location_leaves",
-                        "operation": "=",
-                        "value": "true"
-                    }
-                ]
-            }
         ]
     },
     {
