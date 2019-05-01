@@ -235,17 +235,6 @@ class DiseasesDialog extends ComponentDialog {
 
     calculateDiseasesScore(diseasesData) {
         //TODO:  to calculate fieldCalculate by avg of diseasesScoreData scores
-<<<<<<< HEAD
-        // _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
-        //     const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
-        //     diseasesData.diseases.score.fieldCalculate = avg;
-
-        //     const currentDisease = diseasesData.diseases[index];
-        //     let finalScore = avg, pictueScore = currentDisease.score.picture;
-        //     if (pictueScore > 0) finalScore = _.mean([finalScore, pictueScore]);
-        //     currentDisease.score.finalScore = finalScore;
-        // });
-=======
         _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
             const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
             const currentDisease = diseasesData.diseases[index];
@@ -256,7 +245,6 @@ class DiseasesDialog extends ComponentDialog {
             finalScore = _.mean(listScore);
             currentDisease.score.final = finalScore;
         });
->>>>>>> 4a155a9fb611e6f26925dd100e678ec70b9a7ec1
 
     }
 
