@@ -375,6 +375,19 @@
         ],
         "leaves_sideLeaf": "upper",
         "leaves_sypmtomLeafSurface": [],
-        "metadata": []
+        "metadata": [],
+        "policies": {
+            "questions_order": [
+                "leaves_symptomType",
+                "leaves_symptom_pattern"
+            ],
+            "questions_groups": [
+                {
+                    "conditions": [
+                       
+                    ]
+                }
+            ]
+        }
     }
 ]

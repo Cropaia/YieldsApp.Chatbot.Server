@@ -82,7 +82,7 @@ class DiseasesDialog extends ComponentDialog {
         const crop = answersData.crop;
         const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, diseaseScore, answerData, crop);
         if (nextQuestion == null) {
-            const score = this._calculateFinalScore(diseaseScore)
+            const score = this._calculateFinalScore(disease)
             await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
             return await step.endDialog()
         }
@@ -157,8 +157,7 @@ class DiseasesDialog extends ComponentDialog {
         })
     }
     _calculateFinalScore(diseaseScore) {
-        //TODO: to return patogen Class
-        return 0.8 * 100;
+        return  Math.round(diseaseScore.score.final*10000 ) /100 ;
     }
     _getNextQuestion(diseasesMetaData, disease, diseaseScore, answerData, crop) {
         let fieldQuestion = null;;
@@ -236,6 +235,7 @@ class DiseasesDialog extends ComponentDialog {
 
     calculateDiseasesScore(diseasesData) {
         //TODO:  to calculate fieldCalculate by avg of diseasesScoreData scores
+<<<<<<< HEAD
         // _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
         //     const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
         //     diseasesData.diseases.score.fieldCalculate = avg;
@@ -245,13 +245,27 @@ class DiseasesDialog extends ComponentDialog {
         //     if (pictueScore > 0) finalScore = _.mean([finalScore, pictueScore]);
         //     currentDisease.score.finalScore = finalScore;
         // });
+=======
+        _.forEach(diseasesData.diseasesScoreData, (diseaseScoreData, index) => {
+            const avg = _.meanBy(diseaseScoreData.fields, field => field.score);
+            const currentDisease = diseasesData.diseases[index];
+            currentDisease.score.fieldCalculate = avg;
+
+            let finalScore, pictueScore = currentDisease.score.picture;
+            const listScore = _.compact([avg, pictueScore])
+            finalScore = _.mean(listScore);
+            currentDisease.score.final = finalScore;
+        });
+>>>>>>> 4a155a9fb611e6f26925dd100e678ec70b9a7ec1
 
     }
 
     orderDiseases(diseasesData) {
-        //TODO: to order by finalScore
-        //diseases
-        //diseasesScoreData
+        diseasesData.diseases = _.orderBy(diseasesData.diseases, 'score.final', 'desc');
+        diseasesData.diseasesScoreData = _.sortBy(diseasesData.diseasesScoreData, function (item) {
+            return _.findIndex(diseasesData.diseases, (disease) => disease.id == item.id);
+        });
+ 
     }
 
     async endDiseaseDialog(step) {
@@ -267,6 +281,15 @@ class DiseasesDialog extends ComponentDialog {
 
     _initDataByPicture(diseasesData, pictures) {
         if (pictures.length == 0) return;
+
+        _.forEach(diseasesData.diseases, disease =>{
+            disease.score = {
+                picture: 0,
+                fieldCalculate: 0,
+                final: 0
+            };
+        });
+
         //TODO: to change image to list of images and looping
         let image = fs.createReadStream(pictures[0].localPath);
         var form = new FormData();
@@ -286,13 +309,9 @@ class DiseasesDialog extends ComponentDialog {
                 answerPicture = _.orderBy(answerPicture, 'score', 'desc');
                 diseasesData.answerPicture = answerPicture;
                 _.forEach(diseasesData.diseases, disease => {
-                    const pictureScore = 0 //_.find(answerPicture,) 
-                    //TODO: to find the score in answerPicture by label otherwize= 0
-                    disease.score = {
-                        picture: pictureScore,
-                        fieldCalculate: 0,
-                        final: 0
-                    };
+                    const pictureScore = _.find(answerPicture, { label: disease.diseaseNameClass })
+                    if (!pictureScore) pictureScore.score = 0;
+                    disease.score.picture = pictureScore.score;
                 });
 
 
