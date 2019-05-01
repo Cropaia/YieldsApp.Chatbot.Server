@@ -50,7 +50,7 @@ class DiseasesDialog extends ComponentDialog {
     }
     async initializeStateStep(step) {
         const answersData = await this.UserDataCropAccessor.get(step.context);
-        answersData.diseasesData = new DiseasesData();
+        answersData.diseasesData = new DiseasesData(answersData.crop);
         await this._initDiseaseDataByAnswers(answersData);
 
         return await step.next();
@@ -76,11 +76,11 @@ class DiseasesDialog extends ComponentDialog {
             return await step.endDialog()
         }
 
+        //while nextQuestion!=null getNextDisease or end of diseases
         const disease = answersData.diseasesData.diseases[0];
         const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
         const answerData = answersData.diseasesData.answerData;
-        const crop = answersData.crop;
-        const nextQuestion = this._getNextQuestion(answersData.diseasesData.diseasesMetaData, disease, diseaseScore, answerData, crop);
+        const nextQuestion = this._getNextQuestion(disease, diseaseScore, answerData);
         if (nextQuestion == null) {
             const score = this._calculateFinalScore(disease)
             await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
@@ -159,17 +159,18 @@ class DiseasesDialog extends ComponentDialog {
     _calculateFinalScore(diseaseScore) {
         return  Math.round(diseaseScore.score.final*10000 ) /100 ;
     }
-    _getNextQuestion(diseasesMetaData, disease, diseaseScore, answerData, crop) {
+
+    _getNextQuestion(disease, diseaseScore, answerData) {
         let fieldQuestion = null;;
         while (disease.policies.questions_order.length > 0) {
             const fieldName = disease.policies.questions_order[0];
-            fieldQuestion = this._getNexFieldQuestionByLevel(fieldName, disease, crop, diseasesMetaData);
+            fieldQuestion = disease.questionsByfields[fieldName];
             let question = null;
             while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
                 if (this._checkCondition(disease, diseaseScore, answerData, question.conditions)) {
                     if (fieldQuestion.questions.length == 0) {
-                        //move to next field's question
+                        //TODO: TO Remove it
                         disease.policies.questions_order.shift();
                     }
                     return {
@@ -184,26 +185,6 @@ class DiseasesDialog extends ComponentDialog {
         return null;
     }
 
-    _getNexFieldQuestionByLevel(fieldName, disease, crop, diseasesMetaData) {
-        //disease
-        let metaData = disease.metaData;
-        if (metaData) {
-            const fieldQuestion = _.find(metaData, { label: fieldName });
-            if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
-                return fieldQuestion;
-        }
-
-        //crop
-        metaData = crop.metaData;
-        if (metaData) {
-            const fieldQuestion = _.find(metaData, { label: fieldName });
-            if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
-                return fieldQuestion;
-        }
-
-        //diseaseMetaData
-        return _.find(diseasesMetaData, { label: fieldName });
-    }
     _getMessageQuestion(disease, diseasesData, question) {
         let text = question.question.text;
         if (disease[question.fieldQuestion.label]) {

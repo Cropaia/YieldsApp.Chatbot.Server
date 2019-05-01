@@ -4,7 +4,7 @@ const diseases = require('./diseases.json')
 const _ = require('lodash');
 
 class DiseasesData {
-    constructor() {
+    constructor(crop)  {
         this.diseases = this._getDiseases();
         this.diseasesScoreData = this._getDiseasesScoreData();
         this.diseasesMetaData = this._getDiseasesMetaData();
@@ -12,6 +12,8 @@ class DiseasesData {
         //as diseasesScoreData
         //TODO: to check we can delete it
         this.answerData = {};
+        this.crop = crop;
+        _.fillData();
     }
 
     _getDiseases() {
@@ -28,6 +30,40 @@ class DiseasesData {
         return require('./diseases_metadata.json');
     }
 
+    _fillData() {
+        _.forEach(this.diseases, (disease, index) => {
+            const questionsByfields = _.map(disease.policies.questions_order, label => {
+                return {
+                    "label": label,
+                    "questions": _getNexFieldQuestionByLevel(metaData.label, disease)
+                }
+            });
+            disease.questionsByfields = questionsByfields;
+        });
+    }
+
+    //returnns array of question to this field
+    _getNexFieldQuestionByLevel(fieldName, disease) {
+        //disease
+        let metaData = disease.metaData;
+        if (metaData) {
+            const fieldQuestion = _.find(metaData, { label: fieldName });
+            if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
+                return fieldQuestion;
+        }
+
+        //crop
+        metaData = this.crop.metaData;
+        if (metaData) {
+            const fieldQuestion = _.find(metaData, { label: fieldName });
+            if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
+                return fieldQuestion;
+        }
+
+        //diseaseMetaData
+        return _.find(this.diseasesMetaData, { label: fieldName });
+    }
+    
     static findFieldValue(field, disease, answerData) {
         let userAnswer = false, value = "", objectFields = [];
         const textKeys = field.split(".");
