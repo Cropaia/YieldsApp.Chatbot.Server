@@ -157,14 +157,14 @@ class DiseasesDialog extends ComponentDialog {
         })
     }
     _calculateFinalScore(diseaseScore) {
-        return  Math.round(diseaseScore.score.final*10000 ) /100 ;
+        return Math.round(diseaseScore.score.final * 10000) / 100;
     }
 
     _getNextQuestion(disease, diseaseScore, answerData) {
         let fieldQuestion = null;;
         while (disease.policies.questions_order.length > 0) {
             const fieldName = disease.policies.questions_order[0];
-            fieldQuestion = disease.questionsByfields[fieldName];
+            fieldQuestion = _.find(disease.questionsByfields, { label: fieldName });
             let question = null;
             while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
@@ -234,7 +234,7 @@ class DiseasesDialog extends ComponentDialog {
         diseasesData.diseasesScoreData = _.sortBy(diseasesData.diseasesScoreData, function (item) {
             return _.findIndex(diseasesData.diseases, (disease) => disease.id == item.id);
         });
- 
+
     }
 
     async endDiseaseDialog(step) {
@@ -245,13 +245,13 @@ class DiseasesDialog extends ComponentDialog {
         this._initDataByPicture(answersData.diseasesData, answersData.pictures);
         this._initDataByCrop(answersData.diseasesData, answersData.crop);
         await this._initDataByLocation(answersData.diseasesData, answersData.crop, answersData.location, answersData.plantingDate);
-        this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);        
+        this._initDataBylocationType(answersData.diseasesData, answersData.locationTypes);
     }
 
     _initDataByPicture(diseasesData, pictures) {
         if (pictures.length == 0) return;
 
-        _.forEach(diseasesData.diseases, disease =>{
+        _.forEach(diseasesData.diseases, disease => {
             disease.score = {
                 picture: 0,
                 fieldCalculate: 0,
@@ -485,8 +485,8 @@ class DiseasesDialog extends ComponentDialog {
         diseasesData.diseasesScoreData = diseasesScoreData;
 
         //fill answer for location
-        locationTypes.forEach(location=>{
-            diseasesData.location = diseasesData.answerData['location_' + location]= true;
+        locationTypes.forEach(location => {
+            diseasesData.location = diseasesData.answerData['location_' + location] = true;
         })
 
     }

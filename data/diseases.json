@@ -375,7 +375,84 @@
         ],
         "leaves_sideLeaf": "upper",
         "leaves_sypmtomLeafSurface": [],
-        "metadata": [],
+        "metaData": [
+            {
+                "name": "Symptom Type",
+                "label": "leaves_symptomType",
+                "category": "leaves",
+                "type": "options",
+                "multi": true,
+                "options": [
+                    "necrosis",
+                    "chlorosis",
+                    "lesions",
+                    "spots",
+                    "blotches"
+                ],
+                "questions": [
+                    {
+                        "id": 1,
+                        "text": "What do you think?",
+                        "type": 1,
+                        "options": [
+                            {
+                                "name": "rivki",
+                                "value": 1
+                            },
+                            {
+                                "name": "lea",
+                                "value": 2
+                            }
+                        ],
+                        "multi": false,
+                        "defulatOptions": [
+                            {
+                                "name": "None of those",
+                                "value": 0
+                            }
+                        ],
+                        "filter": true,
+                        "filter_conditions": [
+                            {
+                                "field": "userAnswer.leaves_symptomType.name",
+                                "operation": "=",
+                                "value": "None of those"
+                            }
+                        ],
+                        "score": true,
+                        "score_number": [
+                            {
+                                "value": 1,
+                                "conditions": [
+                                    {
+                                        "operator": "or",
+                                        "conditions": [
+                                            {
+                                                "field": "userAnswer.leaves_symptomType.name",
+                                                "operation": "=",
+                                                "value": "rivki"
+                                            },
+                                            {
+                                                "field": "userAnswer.leaves_symptomType.name",
+                                                "operation": "=",
+                                                "value": "lea"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        "conditions": [
+                            {
+                                "field": "userAnswer.location_leaves",
+                                "operation": "=",
+                                "value": true
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
         "policies": {
             "questions_order": [
                 "leaves_symptomType",

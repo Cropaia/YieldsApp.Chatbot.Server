@@ -13,7 +13,7 @@ class DiseasesData {
         //TODO: to check we can delete it
         this.answerData = {};
         this.crop = crop;
-        _.fillData();
+        this._fillData();
     }
 
     _getDiseases() {
@@ -35,7 +35,7 @@ class DiseasesData {
             const questionsByfields = _.map(disease.policies.questions_order, label => {
                 return {
                     "label": label,
-                    "questions": _getNexFieldQuestionByLevel(metaData.label, disease)
+                    "questions": this._getNexFieldQuestionByLevel(label, disease)
                 }
             });
             disease.questionsByfields = questionsByfields;
@@ -49,7 +49,7 @@ class DiseasesData {
         if (metaData) {
             const fieldQuestion = _.find(metaData, { label: fieldName });
             if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
-                return fieldQuestion;
+                return fieldQuestion.questions;
         }
 
         //crop
@@ -57,11 +57,14 @@ class DiseasesData {
         if (metaData) {
             const fieldQuestion = _.find(metaData, { label: fieldName });
             if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
-                return fieldQuestion;
+                return fieldQuestion.questions;
         }
 
         //diseaseMetaData
-        return _.find(this.diseasesMetaData, { label: fieldName });
+        const fieldQuestion= _.find(this.diseasesMetaData, { label: fieldName });
+        if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
+            return fieldQuestion.questions;
+        return [];
     }
     
     static findFieldValue(field, disease, answerData) {
