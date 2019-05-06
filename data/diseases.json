@@ -652,7 +652,8 @@
         "policies": {
             "questions_order": [
                 "leaves_symptomType",
-                "leaves_symptom_pattern"
+                "leaves_symptom_pattern",
+                "leaves_pattern_color"
             ],
             "questions_groups": [
                 {
