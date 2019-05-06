@@ -151,6 +151,8 @@ class DiseasesDialog extends ComponentDialog {
             }
         }
 
+        //this._filterAndScoreAllQuestionsByField(field, answersData.diseasesData)
+
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
     }
 
@@ -178,6 +180,20 @@ class DiseasesDialog extends ComponentDialog {
 
             }
         });
+    }
+
+
+    _filterAndScoreAllQuestionsByField(field, diseasesData){
+        //loop all  diseases
+        //find exists disease.policies.questions_order by fieldName
+        //if not exists continue
+        //fieldQuestion = _.find(disease.questionsByfields, { label: fieldName });
+        //fieldQuestion.loop questions 
+        //check if condition:  if (this._checkCondition(disease, diseaseScore, answerData, question.conditions)) {
+        //+please in filter and score if field exists
+        //check if filter=true, check filter condition: true- to filter the disease, 
+        //check if score =true, if true,loop score_number and  to score value by it 
+        //if filter or score remove question from list
     }
 
     _getFirstScore(disease, diseaseScoreData, diseasesData, scoreList) {
