@@ -4,7 +4,7 @@ const diseases = require('./diseases.json')
 const _ = require('lodash');
 
 class DiseasesData {
-    constructor(crop)  {
+    constructor(crop) {
         this.diseases = this._getDiseases();
         this.diseasesScoreData = this._getDiseasesScoreData();
         this.diseasesMetaData = this._getDiseasesMetaData();
@@ -12,6 +12,8 @@ class DiseasesData {
         //as diseasesScoreData
         //TODO: to check we can delete it
         this.answerData = {};
+        this.answerDataOriginal = {};
+
         this.crop = crop;
         this._fillData();
     }
@@ -61,17 +63,18 @@ class DiseasesData {
         }
 
         //diseaseMetaData
-        const fieldQuestion= _.find(this.diseasesMetaData, { label: fieldName });
+        const fieldQuestion = _.find(this.diseasesMetaData, { label: fieldName });
         if (fieldQuestion != null && fieldQuestion.questions && fieldQuestion.questions.length > 0)
             return fieldQuestion.questions;
         return [];
     }
-    
-    static findFieldValue(field, disease, answerData) {
-        let userAnswer = false, value = "", objectFields = [];
+
+    static findFieldValue(field, disease, diseasesData) {
+        let userAnswer = false, userAnswerOriginal = false, value = "", objectFields = [];
         const textKeys = field.split(".");
         if (textKeys.length > 1) {
             userAnswer = textKeys[0] == "userAnswer";
+            userAnswerOriginal = textKeys[0] == "userAnswerOriginal";
             field = textKeys[1];
             objectFields = textKeys.slice(2);
         } else {
@@ -80,7 +83,9 @@ class DiseasesData {
         }
 
         if (userAnswer) {
-            value = this._getAnswerDataValue(field, answerData, objectFields)
+            value = this._getAnswerDataValue(field, diseasesData.answerData, objectFields)
+        } else if (userAnswerOriginal) {
+            value = this._getAnswerDataOriginalValue(field, diseasesData.answerDataOriginal, objectFields)
         } else {
             value = this._getDiseaseValue(field, disease, objectFields)
         }
@@ -89,6 +94,11 @@ class DiseasesData {
 
     static _getAnswerDataValue(fieldName, answerData, objectFields) {
         const value = answerData[fieldName];
+        return this.calculateValue(value, objectFields);
+    }
+    
+    static _getAnswerDataOriginalValue(fieldName, answerDataOriginal, objectFields) {
+        const value = answerDataOriginal[fieldName];
         return this.calculateValue(value, objectFields);
     }
 

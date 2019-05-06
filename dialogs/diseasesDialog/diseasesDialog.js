@@ -79,8 +79,7 @@ class DiseasesDialog extends ComponentDialog {
         //while nextQuestion!=null getNextDisease or end of diseases
         const disease = answersData.diseasesData.diseases[0];
         const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
-        const answerData = answersData.diseasesData.answerData;
-        const nextQuestion = this._getNextQuestion(disease, diseaseScore, answerData);
+        const nextQuestion = this._getNextQuestion(disease, diseaseScore, answersData.diseasesData);
         if (nextQuestion == null) {
             const score = this._calculateFinalScore(disease)
             await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
@@ -94,13 +93,15 @@ class DiseasesDialog extends ComponentDialog {
     }
 
     async _prompQuestion(step, disease, diseasesData, nextQuestion) {
-        const message = this._getMessageQuestion(disease, diseasesData, nextQuestion);
+        const message = this._getMessageQuestion(disease, diseasesData, nextQuestion.question.text, nextQuestion.fieldQuestion.label);
         const question = nextQuestion.question;
         if (question.type == QuestionType.Options) {
             question.listOptions = _.concat(question.options, question.defulatOptions || []);
             let list = question.listOptions.map((option) => {
-                return option.name;
+                return this._getMessageQuestion(disease, diseasesData, option.name, nextQuestion.fieldQuestion.label);
             });
+
+
             return await step.prompt(SELECTION_PROMPT, {
                 prompt: message,
                 choices: list
@@ -118,6 +119,7 @@ class DiseasesDialog extends ComponentDialog {
         const fieldQuestion = answersData.nextQuestion.fieldQuestion;
         const answerResult = step.result;
         const disease = answersData.diseasesData.diseases[answersData.diseaseIndex];
+        const currentDiseaseScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
         let value, answer;
         if (question.type == QuestionType.Options) {
             answer = question;
@@ -125,11 +127,9 @@ class DiseasesDialog extends ComponentDialog {
         }
         else {//YESNO_PROMPT
             answer = question.answers[answerResult];
-            value = answer.value; //TODO: to calculte value
+            value = answerResult;
         }
-        answersData.diseasesData.answerData[fieldQuestion.label] = value;
-        const currentDiseaseScoreData = answersData.diseasesData.diseasesScoreData[answersData.diseaseIndex];
-        const answerData = answersData.diseasesData.answerData;
+        answersData.diseasesData.answerDataOriginal[fieldQuestion.label] = value;
         let field = _.find(currentDiseaseScoreData.fields, { name: fieldQuestion.label })
         if (!field) {
             field = {};
@@ -137,12 +137,14 @@ class DiseasesDialog extends ComponentDialog {
         }
         field.value = value;
         field.name = fieldQuestion.label;
-        const score = this._getFirstScore(disease, currentDiseaseScoreData, answerData, answer.score_number);
+        this._updateQuestionValue(fieldQuestion.label, answer.value, value, disease, currentDiseaseScoreData, answersData.diseasesData);
+
+        const score = this._getFirstScore(disease, currentDiseaseScoreData, answersData.diseasesData, answer.score_number);
         //TODO: if score = null
         field.score = score.value;
 
         if (answer.filter) {
-            if (this._checkCondition(disease, currentDiseaseScoreData, answerData, answer.filter_conditions)) {
+            if (this._checkCondition(disease, currentDiseaseScoreData, answersData.diseasesData, answer.filter_conditions)) {
                 answersData.diseasesData.diseases.splice(answersData.diseaseIndex, 1);
                 answersData.diseasesData.diseasesScoreData.splice(answersData.diseaseIndex, 1);
                 return await step.replaceDialog(NEXT_QUESTION_DIALOG);
@@ -151,16 +153,43 @@ class DiseasesDialog extends ComponentDialog {
 
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
     }
-    _getFirstScore(disease, diseaseScoreData, answerData, scoreList) {
+
+    _updateQuestionValue(fieldName, questionValues, userAnswerValue, disease, diseaseScoreData, diseasesData) {
+        _.forEach(questionValues, questionValue => {
+            if (this._checkCondition(disease, diseaseScoreData, diseasesData, questionValue.conditions)) {
+                const to_value_field = questionValue.to_value_field || fieldName;
+                let value = '', isSetValue = true;
+                if (questionValue.is_from_value_answer != false) {
+                    value = userAnswerValue;
+                } else if (questionValue.from_value_disease_field) {
+                    value = disease[questionValue.from_value_disease_field];
+                } else if (questionValue.from_value) {
+                    value = questionValue.from_value;
+                }
+                else if (questionValue.from_no_value) {
+                    diseasesData.answerData[to_value_field + "_no"] = value;
+                }
+                else {
+                    isSetValue = false;
+                }
+                if (isSetValue) {
+                    diseasesData.answerData[to_value_field] = value;
+                }
+
+            }
+        });
+    }
+
+    _getFirstScore(disease, diseaseScoreData, diseasesData, scoreList) {
         return _.first(scoreList, (score) => {
-            return _checkCondition(disease, diseaseScoreData, answerData, score.conditions);
+            return _checkCondition(disease, diseaseScoreData, diseasesData, score.conditions);
         })
     }
     _calculateFinalScore(diseaseScore) {
         return Math.round(diseaseScore.score.final * 10000) / 100;
     }
 
-    _getNextQuestion(disease, diseaseScore, answerData) {
+    _getNextQuestion(disease, diseaseScore, diseasesData) {
         let fieldQuestion = null;;
         while (disease.policies.questions_order.length > 0) {
             const fieldName = disease.policies.questions_order[0];
@@ -168,7 +197,7 @@ class DiseasesDialog extends ComponentDialog {
             let question = null;
             while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
-                if (this._checkCondition(disease, diseaseScore, answerData, question.conditions)) {
+                if (this._checkCondition(disease, diseaseScore, diseasesData, question.conditions)) {
                     if (fieldQuestion.questions.length == 0) {
                         //TODO: TO Remove it
                         disease.policies.questions_order.shift();
@@ -185,10 +214,9 @@ class DiseasesDialog extends ComponentDialog {
         return null;
     }
 
-    _getMessageQuestion(disease, diseasesData, question) {
-        let text = question.question.text;
-        if (disease[question.fieldQuestion.label]) {
-            text = text.replace("{{value}}", disease[question.fieldQuestion.label]);
+    _getMessageQuestion(disease, diseasesData, text, fieldName) {
+        if (disease[fieldName]) {
+            text = text.replace("{{value}}", disease[fieldName]);
         }
 
         let openBracket = 0, closeBracket = 0, textBracketKey = '';
@@ -199,7 +227,7 @@ class DiseasesDialog extends ComponentDialog {
                 if (closeBracket != -1) {
                     textBracketKey = text.substring(openBracket, closeBracket + 2);
                     const textKey = textBracketKey.replace("{{", "").replace("}}", "");
-                    const value = DiseasesData.findFieldValue(textKey, disease, diseasesData.answerData);
+                    const value = DiseasesData.findFieldValue(textKey, disease, diseasesData);
                     text = text.replace(textBracketKey, value);
                 }
             }
@@ -208,8 +236,8 @@ class DiseasesDialog extends ComponentDialog {
         return text;
     }
 
-    _checkCondition(disease, diseaseScoreData, answerData, conditions) {
-        var diseasesCondition = new DiseasesCondition(disease, diseaseScoreData, answerData);
+    _checkCondition(disease, diseaseScoreData, diseasesData, conditions) {
+        var diseasesCondition = new DiseasesCondition(disease, diseaseScoreData, diseasesData);
         const result = diseasesCondition.checkConditions(conditions);
         return result;
     }

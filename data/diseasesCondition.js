@@ -8,10 +8,10 @@ const OPERATOR = {
 
 
 class DiseasesCondition {
-    constructor(disease, diseaseScoreData, answerData) {
+    constructor(disease, diseaseScoreData, diseasesData) {
         this.disease = disease;
         this.diseaseScoreData = diseaseScoreData;
-        this.answerData = answerData;
+        this.diseasesData = diseasesData;
     }
 
     checkConditions(conditions, operator = OPERATOR.AND) {
@@ -37,7 +37,7 @@ class DiseasesCondition {
     }
 
     _isConditionCorrect(condition) {
-        let fieldValue = DiseasesData.findFieldValue(condition.field, this.disease, this.answerData);
+        let fieldValue = DiseasesData.findFieldValue(condition.field, this.disease, this.diseasesData);
 
 
         switch (condition.operation) {
