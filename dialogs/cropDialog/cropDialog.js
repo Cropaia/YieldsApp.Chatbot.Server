@@ -67,7 +67,7 @@ class CropDialog extends ComponentDialog {
         } else {
             // Since no attachment was received, send an attachment to the user.
             return await step.prompt(ATTACHMENT_PROMPT, {
-                prompt: 'Please upload crop image',
+                prompt: `Oops...I'll need a photo of your crop in order to help you...`,
                 retryPrompt: 'You didn\'t upload any attachment, please upload crop image.'
             });
         }
@@ -95,7 +95,7 @@ class CropDialog extends ComponentDialog {
 
             // await this.displayCropOptions(step.context);
             return await step.prompt(SELECTION_PROMPT, {
-                prompt: 'select crop:',
+                prompt: 'Just to verify, could you tell me which crop it is?',
                 retryPrompt: 'Please choose an option from the list.',
                 choices: list
             });
@@ -113,7 +113,7 @@ class CropDialog extends ComponentDialog {
         }
 
         if (userDataCrop.plantingDate == undefined) {
-            return await step.prompt(DATE_PROMPT, 'please enter planting date');
+            return await step.prompt(DATE_PROMPT, 'OK. What was the planting date?');
         } else {
             return await step.next();
         }
@@ -134,7 +134,7 @@ class CropDialog extends ComponentDialog {
         // Create a prompt message.
         let message;
         if (list.length === 0) {
-            message = 'Please choose a location to review';
+            message = 'On which part/s of the plant do you see the symtpoms?';
         } else {
             message = `You have selected **${list[list.length - 1]}**. You can review an addition location, ` +
                 'or choose `' + DONE_OPTION + '` to finish.';
