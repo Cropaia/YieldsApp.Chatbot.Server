@@ -222,7 +222,7 @@ _filterAndScoreAllQuestionsByField(field, diseasesData) {
     }
 
 
-    _filterAndScoreAllQuestionsByField(field, diseasesData){
+    // _filterAndScoreAllQuestionsByField(field, diseasesData){
         //loop all  diseases
         //find exists disease.policies.questions_order by fieldName
         //if not exists continue
@@ -233,7 +233,7 @@ _filterAndScoreAllQuestionsByField(field, diseasesData) {
         //check if filter=true, check filter condition: true- to filter the disease, 
         //check if score =true, if true,loop score_number and  to score value by it 
         //if filter or score remove question from list
-    }
+    // }
 
     _getFirstScore(disease, diseaseScoreData, diseasesData, scoreList) {
         return _.first(scoreList, (score) => {
