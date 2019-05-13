@@ -158,42 +158,42 @@ class DiseasesDialog extends ComponentDialog {
 
     
     
-_filterAndScoreAllQuestionsByField(field, diseasesData) {
-    let value = 0;
-    _.forEach(diseasesData.diseases, (disease, index) => {
-        let fieldQuestion = null;
-        const fieldName = _.find(disease.policies.questions_order, value => value == field.name)
-        if (fieldName) {
-            fieldQuestion = _.find(disease.questionsByfields, { label: field.name });
-            _.forEach(fieldQuestion.questions, (question, index) => {
-                if (this._checkCondition(disease, diseasesData.diseasesScoreData, diseasesData.answerData, question.conditions)) {
-                    if (question.filter && this._checkCondition(disease, diseasesData.diseasesScoreData, diseasesData.answerData, question.filter_conditions)) {
-                        answersData.diseasesData.diseases.splice(answerData.diseaseIndex, 1);
-                        answersData.diseasesData.diseasesScoreData.splice(answersData.diseaseIndex, 1);
-                    }
-                }
+    _filterAndScoreAllQuestionsByField(field, diseasesData) {
+        // let value = 0;
+        // _.forEach(diseasesData.diseases, (disease, index) => {
+        //     let fieldQuestion = null;
+        //     const fieldName = _.find(disease.policies.questions_order, value => value == field.name)
+        //     if (fieldName) {
+        //         fieldQuestion = _.find(disease.questionsByfields, { label: field.name });
+        //         _.forEach(fieldQuestion.questions, (question, index) => {
+        //             if (this._checkCondition(disease, diseasesData.diseasesScoreData, diseasesData.answerData, question.conditions)) {
+        //                 if (question.filter && this._checkCondition(disease, diseasesData.diseasesScoreData, diseasesData.answerData, question.filter_conditions)) {
+        //                     answersData.diseasesData.diseases.splice(answerData.diseaseIndex, 1);
+        //                     answersData.diseasesData.diseasesScoreData.splice(answersData.diseaseIndex, 1);
+        //                 }
+        //             }
 
-                if (question.score) {
-                    _.forEach(question.score_number, (questionScore, index) => {
-                        if (this._checkCondition(disease, diseasesData.diseasesScoreData, diseasesData.answerData, questionScore.conditions)) {
-                            let field = _.find(currentDiseaseScoreData.fields, { name: fieldQuestion.label })
-                            if (!field) {
-                                field = {};
-                                currentDiseaseScoreData.fields.push(field);
-                            }
-                            field.value = value;
-                            field.name = fieldQuestion.label;
-                            const score = this._getFirstScore(disease, currentDiseaseScoreData, answerData, answer.score_number);
-                            //TODO: if score = null
-                            field.score = score.value;                        
-                        }
-                    });
+        //             if (question.score) {
+        //                 _.forEach(question.score_number, (questionScore, index) => {
+        //                     if (this._checkCondition(disease, diseasesData.diseasesScoreData, diseasesData.answerData, questionScore.conditions)) {
+        //                         let field = _.find(currentDiseaseScoreData.fields, { name: fieldQuestion.label })
+        //                         if (!field) {
+        //                             field = {};
+        //                             currentDiseaseScoreData.fields.push(field);
+        //                         }
+        //                         field.value = value;
+        //                         field.name = fieldQuestion.label;
+        //                         const score = this._getFirstScore(disease, currentDiseaseScoreData, answerData, answer.score_number);
+        //                         //TODO: if score = null
+        //                         field.score = score.value;                        
+        //                     }
+        //                 });
 
-                }
-            });
-        }
-    });
-}
+        //             }
+        //         });
+        //     }
+        // });
+    }
 
     _updateQuestionValue(fieldName, questionValues, userAnswerValue, disease, diseaseScoreData, diseasesData) {
         _.forEach(questionValues, questionValue => {
