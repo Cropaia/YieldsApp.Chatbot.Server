@@ -106,7 +106,8 @@
         "policies": {
             "questions_order": [
                 "leaves_symptomType",
-                "leaves_symptom_pattern"
+                "leaves_symptom_pattern",
+                "leaves_pattern_color"
             ],
             "questions_groups": [
                 {
@@ -117,13 +118,11 @@
                             "value": "lesions"
                         },
                         {
-                            "operator": "and",
                             "field": "userAnswer.leaves_symptom_pattern.name",
                             "operation": "=",
-                            "value": "concentric circles"
+                            "value": "Concentric circles"
                         },
                         {
-                            "operator": "and",
                             "field": "userAnswer.leaves_pattern_color.name",
                             "operation": "=",
                             "value": "Brown/Dark"

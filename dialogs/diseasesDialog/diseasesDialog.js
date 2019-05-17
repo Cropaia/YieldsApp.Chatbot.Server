@@ -65,10 +65,13 @@ class DiseasesDialog extends ComponentDialog {
         this.calculateDiseasesScore(answersData.diseasesData);
         this.orderDiseases(answersData.diseasesData);
         const countDiseases = answersData.diseasesData.diseases.length;
-        if (countDiseases == 1) {
-            const disease = answersData.diseasesData.diseases[0];
-            const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
-            const score = this._calculateFinalScore(diseaseScore)
+        //while nextQuestion!=null getNextDisease or end of diseases
+        const disease = answersData.diseasesData.diseases[0];
+        const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
+        const isPolicyGroups = this._isPolicyGroup(answersData.diseasesData, disease, diseaseScore);
+
+        if (isPolicyGroups) {
+            const score = this._calculateFinalScore(disease, isPolicyGroups)
             await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
             return await step.endDialog()
         } else if (countDiseases == 0) {
@@ -76,9 +79,8 @@ class DiseasesDialog extends ComponentDialog {
             return await step.endDialog()
         }
 
-        //while nextQuestion!=null getNextDisease or end of diseases
-        const disease = answersData.diseasesData.diseases[0];
-        const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
+
+
         const nextQuestion = this._getNextQuestion(disease, diseaseScore, answersData.diseasesData);
         if (nextQuestion == null) {
             const score = this._calculateFinalScore(disease)
@@ -156,8 +158,8 @@ class DiseasesDialog extends ComponentDialog {
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
     }
 
-    
-    
+
+
     _filterAndScoreAllQuestionsByField(field, diseasesData) {
         // let value = 0;
         // _.forEach(diseasesData.diseases, (disease, index) => {
@@ -195,6 +197,13 @@ class DiseasesDialog extends ComponentDialog {
         // });
     }
 
+    _isPolicyGroup(diseasesData, disease, diseaseScoreData) {
+        const policy = _.find(disease.policies.questions_groups, group => {
+            return this._checkCondition(disease, diseaseScoreData, diseasesData, group.conditions)
+        });
+        return !!policy;
+    }
+
     _updateQuestionValue(fieldName, questionValues, userAnswerValue, disease, diseaseScoreData, diseasesData) {
         _.forEach(questionValues, questionValue => {
             if (this._checkCondition(disease, diseaseScoreData, diseasesData, questionValue.conditions)) {
@@ -223,16 +232,16 @@ class DiseasesDialog extends ComponentDialog {
 
 
     // _filterAndScoreAllQuestionsByField(field, diseasesData){
-        //loop all  diseases
-        //find exists disease.policies.questions_order by fieldName
-        //if not exists continue
-        //fieldQuestion = _.find(disease.questionsByfields, { label: fieldName });
-        //fieldQuestion.loop questions 
-        //check if condition:  if (this._checkCondition(disease, diseaseScore, answerData, question.conditions)) {
-        //+please in filter and score if field exists
-        //check if filter=true, check filter condition: true- to filter the disease, 
-        //check if score =true, if true,loop score_number and  to score value by it 
-        //if filter or score remove question from list
+    //loop all  diseases
+    //find exists disease.policies.questions_order by fieldName
+    //if not exists continue
+    //fieldQuestion = _.find(disease.questionsByfields, { label: fieldName });
+    //fieldQuestion.loop questions 
+    //check if condition:  if (this._checkCondition(disease, diseaseScore, answerData, question.conditions)) {
+    //+please in filter and score if field exists
+    //check if filter=true, check filter condition: true- to filter the disease, 
+    //check if score =true, if true,loop score_number and  to score value by it 
+    //if filter or score remove question from list
     // }
 
     _getFirstScore(disease, diseaseScoreData, diseasesData, scoreList) {
@@ -240,7 +249,8 @@ class DiseasesDialog extends ComponentDialog {
             return _checkCondition(disease, diseaseScoreData, diseasesData, score.conditions);
         })
     }
-    _calculateFinalScore(diseaseScore) {
+    _calculateFinalScore(diseaseScore, isPolicyGroups) {
+        if (isPolicyGroups) diseaseScore.score.final = _.mean([1, diseaseScore.score.final]);
         return Math.round(diseaseScore.score.final * 10000) / 100;
     }
 
