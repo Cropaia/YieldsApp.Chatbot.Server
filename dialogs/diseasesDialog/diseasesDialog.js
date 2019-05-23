@@ -64,34 +64,38 @@ class DiseasesDialog extends ComponentDialog {
 
         this.calculateDiseasesScore(answersData.diseasesData);
         this.orderDiseases(answersData.diseasesData);
-        const countDiseases = answersData.diseasesData.diseases.length;
+
+        let indexDiseases = 0;
         //while nextQuestion!=null getNextDisease or end of diseases
-        const disease = answersData.diseasesData.diseases[0];
-        const diseaseScore = answersData.diseasesData.diseasesScoreData[0];
-        const isPolicyGroups = this._isPolicyGroup(answersData.diseasesData, disease, diseaseScore);
+        do {
+            let disease = answersData.diseasesData.diseases[indexDiseases];
+            let diseaseScore = answersData.diseasesData.diseasesScoreData[indexDiseases];
+            const isPolicyGroups = this._isPolicyGroup(answersData.diseasesData, disease, diseaseScore);
 
-        if (isPolicyGroups) {
-            const score = this._calculateFinalScore(disease, isPolicyGroups)
-            await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
-            return await step.endDialog()
-        } else if (countDiseases == 0) {
-            await step.context.sendActivity(`Didn't found your disease`);
-            return await step.endDialog()
-        }
+            if (isPolicyGroups) {
+                const score = this._calculateFinalScore(disease, isPolicyGroups)
+                await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
+                return await step.endDialog()
+            }
+            const nextQuestion = this._getNextQuestion(disease, diseaseScore, answersData.diseasesData);
+            indexDiseases++;
 
+            if (nextQuestion == null && indexDiseases == answersData.diseasesData.diseases.length) {
+                let disease = answersData.diseasesData.diseases[0];
+                const score = this._calculateFinalScore(disease)
 
+                await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
+                return await step.endDialog()
+            }
+            answersData.nextQuestion = nextQuestion;
+            answersData.disease = disease;
+            answersData.diseaseIndex = 0;
+            if (nextQuestion != null)
+                return await this._prompQuestion(step, disease, answersData.diseasesData, nextQuestion);
+        } while (indexDiseases < answersData.diseasesData.diseases.length);
 
-        const nextQuestion = this._getNextQuestion(disease, diseaseScore, answersData.diseasesData);
-        if (nextQuestion == null) {
-            const score = this._calculateFinalScore(disease)
-            await step.context.sendActivity(`Your Disease is ${disease.commonName} with score of ${score}`);
-            return await step.endDialog()
-        }
-        answersData.nextQuestion = nextQuestion;
-        answersData.disease = disease;
-        answersData.diseaseIndex = 0;
-
-        return await this._prompQuestion(step, disease, answersData.diseasesData, nextQuestion);
+        await step.context.sendActivity(`Didn't found your disease`);
+        return await step.endDialog();
     }
 
     async _prompQuestion(step, disease, diseasesData, nextQuestion) {
@@ -153,7 +157,7 @@ class DiseasesDialog extends ComponentDialog {
             }
         }
 
-        this._filterAndScoreAllQuestionsByField(field, answersData.diseasesData)
+        //this._filterAndScoreAllQuestionsByField(field, answersData.diseasesData)
 
         return await step.replaceDialog(NEXT_QUESTION_DIALOG);
     }
@@ -254,28 +258,42 @@ class DiseasesDialog extends ComponentDialog {
         return Math.round(diseaseScore.score.final * 10000) / 100;
     }
 
+
+    // _getNextQuestion(disease, diseaseScore, diseasesData) {
+    //     // let questionCuont= disease.questionsByfields;
+    //     let fieldQuestion = null;
+    //     _.forEach(disease.policies.questions_order, fieldName => {
+    //         fieldQuestion = _.find(disease.questionsByfields, { label: fieldName });
+
+    //     });
+    //     while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
+    //         const question = fieldQuestion.questions.shift();
+    //         if (this._checkCondition(disease, diseaseScore, diseasesData, question.conditions)) {
+    //             return {
+    //                 question: question,
+    //                 fieldQuestion: fieldQuestion
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
+
     _getNextQuestion(disease, diseaseScore, diseasesData) {
         let fieldQuestion = null;;
-        while (disease.policies.questions_order.length > 0) {
-            const fieldName = disease.policies.questions_order[0];
+        for (let index = 0; index < disease.policies.questions_order.length; index++) {
+            const fieldName = disease.policies.questions_order[index];
             fieldQuestion = _.find(disease.questionsByfields, { label: fieldName });
             let question = null;
             while (fieldQuestion && (fieldQuestion.questions && fieldQuestion.questions.length > 0)) {
                 question = fieldQuestion.questions.shift();
                 if (this._checkCondition(disease, diseaseScore, diseasesData, question.conditions)) {
-                    if (fieldQuestion.questions.length == 0) {
-                        //TODO: TO Remove it
-                        disease.policies.questions_order.shift();
-                    }
                     return {
                         question: question,
                         fieldQuestion: fieldQuestion
                     }
                 }
             }
-            disease.policies.questions_order.shift();
         }
-
         return null;
     }
 
@@ -315,7 +333,8 @@ class DiseasesDialog extends ComponentDialog {
             currentDisease.score.fieldCalculate = avg;
 
             let finalScore, pictueScore = currentDisease.score.picture;
-            const listScore = _.compact([avg, pictueScore])
+            //const listScore = _.compact([avg, pictueScore])
+            const listScore = _.compact([pictueScore])
             finalScore = _.mean(listScore);
             currentDisease.score.final = finalScore;
         });

@@ -72,6 +72,10 @@ class CropDialog extends ComponentDialog {
             });
         }
     }
+    requireUncached(module) {
+        delete require.cache[require.resolve(module)]
+        return require(module)
+    }
     async promptForCropStep(step) {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context);
 
@@ -84,7 +88,7 @@ class CropDialog extends ComponentDialog {
         console.log('userDataCrop', userDataCrop);
 
         if (!userDataCrop || userDataCrop.crop == undefined) {
-            const cropList = require('./../../data/crop.json');
+            const cropList = this.requireUncached('./../../data/crop.json');
 
             let list = cropList.map((crop) => {
                 // var object = {};
@@ -107,7 +111,7 @@ class CropDialog extends ComponentDialog {
         const userDataCrop = await this.UserDataCropAccessor.get(step.context)
         if (userDataCrop.crop == undefined && step.result) {
             const text = step.result.value;
-            const cropList = require('./../../data/crop.json');
+            const cropList = this.requireUncached('./../../data/crop.json');
             let crop = cropList.find(x => x.name == text);
             userDataCrop.crop = crop;
         }

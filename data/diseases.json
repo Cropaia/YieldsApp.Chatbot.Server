@@ -329,6 +329,12 @@
                                 "operation": "=",
                                 "value": "Concentric circles"
                             }
+                        ],
+                        "value": [
+                            {
+                                "conditions": [],
+                                "is_from_value_answer" : true
+                            }
                         ]
 
                     },
@@ -379,7 +385,7 @@
     {
         "id": 2,
         "diseaseNameClass": "bacterial_spot",
-        "commonName": "Late blight ",
+        "commonName": "Septoria",
         "region": "us",
         "temperature_min": 8,
         "temperature_max": 25,

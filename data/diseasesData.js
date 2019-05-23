@@ -1,5 +1,5 @@
 
-const diseases = require('./diseases.json')
+// const diseases = require('./diseases.json')
 //const diseasesMetaData = require('./diseases_metadata.json')
 const _ = require('lodash');
 
@@ -18,8 +18,13 @@ class DiseasesData {
         this._fillData();
     }
 
+    requireUncached(module) {
+        delete require.cache[require.resolve(module)]
+        return require(module)
+    }
+
     _getDiseases() {
-        return require('./diseases.json');
+        return this.requireUncached('./diseases.json');
     }
 
     _getDiseasesScoreData() {
@@ -29,7 +34,7 @@ class DiseasesData {
     }
 
     _getDiseasesMetaData() {
-        return require('./diseases_metadata.json');
+        return this.requireUncached('./diseases_metadata.json');
     }
 
     _fillData() {
@@ -96,7 +101,7 @@ class DiseasesData {
         const value = answerData[fieldName];
         return this.calculateValue(value, objectFields);
     }
-    
+
     static _getAnswerDataOriginalValue(fieldName, answerDataOriginal, objectFields) {
         const value = answerDataOriginal[fieldName];
         return this.calculateValue(value, objectFields);
