@@ -19,7 +19,7 @@
     "botframework-config": "^4.1.5",
     "dotenv": "^6.1.0",
     "form-data": "^2.3.3",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "request": "^2.88.0",
     "moment": "^2.24.0",
     "node-fetch": "^2.3.0",
