@@ -22,7 +22,7 @@
     "lodash": "^4.17.11",
     "request": "^2.88.0",
     "moment": "^2.24.0",
-    "node-fetch": "^2.3.0",
+    "node-fetch": "^2.6.7",
     "restify": "^8.1.0"
   },
   "devDependencies": {
