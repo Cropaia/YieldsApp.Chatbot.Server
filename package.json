@@ -13,7 +13,7 @@
   "dependencies": {
     "app-root-path": "^2.1.0",
     "botbuilder": "^4.1.5",
-    "botbuilder-azure": "^4.1.5",
+    "botbuilder-azure": "^4.18.0",
     "botbuilder-dialogs": "^4.2.0",
     "botbuilder-location": "^2.0.0",
     "botframework-config": "^4.1.5",
